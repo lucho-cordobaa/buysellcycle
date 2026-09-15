@@ -1,0 +1,218 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Provincia {
+  id        Int      @id @default(autoincrement())
+  nombre    String   @unique
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  localidades Localidad[]
+  sucursales Sucursal[]
+  clientes Cliente[]
+  depositos Deposito[]
+}
+
+model Localidad {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  provincia Provincia @relation(fields: [provinciaId], references: [id])
+  provinciaId Int
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  sucursales Sucursal[]
+  clientes Cliente[]
+  depositos Deposito[]
+  @@unique([nombre, provinciaId])
+}
+
+model Marca {
+  id        Int    @id @default(autoincrement())
+  nombre    String @unique
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  productos Producto[]
+}
+
+model CategoriaNivel1 {
+  id        Int    @id @default(autoincrement())
+  nombre    String @unique
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  categoriasNivel2 CategoriaNivel2[]
+}
+
+model CategoriaNivel2 {
+  id        Int    @id @default(autoincrement())
+  nombre    String @unique
+  categoriaNivel1 CategoriaNivel1 @relation(fields: [categoriaNivel1Id], references: [id])
+  categoriaNivel1Id Int
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  productos Producto[]
+}
+
+model Sucursal {
+  id        Int    @id @default(autoincrement())
+  nombre    String
+  provincia Provincia @relation(fields: [provinciaId], references: [id])
+  provinciaId Int
+  localidad Localidad @relation(fields: [localidadId], references: [id])
+  localidadId Int
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  usuarios Usuario[]
+  @@unique([nombre, localidadId])
+}
+
+model Cliente {
+  id        Int    @id @default(autoincrement())
+  nombre    String
+  apellido  String
+  dni       String @unique
+  email     String @unique
+  provincia Provincia @relation(fields: [provinciaId], references: [id])
+  provinciaId Int
+  localidad Localidad @relation(fields: [localidadId], references: [id])
+  localidadId Int
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  presupuestos Presupuesto[]
+}
+
+enum Rol {
+  Administracion 
+  Vendedor
+}
+
+model Usuario {
+  id        Int    @id @default(autoincrement())
+  nombre    String
+  apellido  String
+  dni       String @unique
+  rol       Rol
+  nombreUsuario String @unique
+  sucursal Sucursal @relation(fields: [sucursalId], references: [id])
+  sucursalId Int
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  presupuestos Presupuesto[]
+}
+
+model Deposito {
+  id        Int    @id @default(autoincrement())
+  codigo    String @unique
+  nombre    String
+  provincia Provincia @relation(fields: [provinciaId], references: [id])
+  provinciaId Int
+  localidad Localidad @relation(fields: [localidadId], references: [id])
+  localidadId Int
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  stockProductoDeposito StockProductoDeposito[]
+}
+
+model Proveedor {
+  id        Int    @id @default(autoincrement())
+  razonSocial String
+  cuit      String @unique
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+}
+
+enum Estado {
+  DISPONIBLE
+  ACTIVO
+  INACTIVO
+}
+
+model Producto {
+  id        Int    @id @default(autoincrement())
+  nombre    String @unique
+  stockTotal Int
+  costoNeto  Decimal @db.Decimal(10, 2)
+  utilidad    Decimal @db.Decimal(10, 2)
+  precioLista Decimal @db.Decimal(10, 2)
+  descuentoContado Decimal @db.Decimal(10, 2)
+  precioContado Decimal @db.Decimal(10, 2)
+  estado    Estado
+  fechaHoraUltimoMovimientoStock DateTime
+  fechaHoraUltimaSincronizacionStock DateTime
+  rutaImagenStorage String?
+  marca     Marca @relation(fields: [marcaId], references: [id])
+  marcaId   Int
+  categoriaNivel2 CategoriaNivel2 @relation(fields: [categoriaNivel2Id], references: [id])
+  categoriaNivel2Id Int
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  stockProductoDeposito StockProductoDeposito[]
+  detallePresupuesto DetallePresupuesto[]
+}
+
+model StockProductoDeposito {
+  id        Int    @id @default(autoincrement())
+  deposito  Deposito @relation(fields: [depositoId], references: [id])
+  depositoId Int
+  producto  Producto @relation(fields: [productoId], references: [id])
+  productoId Int
+  stock  Int
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  @@unique ([depositoId, productoId])
+}
+
+enum EstadoPresupuesto {
+  PENDIENTE
+  ACEPTADO
+  RECHAZADO
+  VENCIDO
+}
+
+model Presupuesto {
+  id        Int    @id @default(autoincrement())
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+  clienteId Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  total     Decimal @db.Decimal(10, 2)
+  estado    EstadoPresupuesto
+  archivado Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+  fechaActualizacion DateTime @updatedAt
+  detallePresupuesto DetallePresupuesto[]
+}
+
+model DetallePresupuesto {
+  id        Int    @id @default(autoincrement())
+  presupuesto Presupuesto @relation(fields: [presupuestoId], references: [id])
+  presupuestoId Int
+  producto  Producto @relation(fields: [productoId], references: [id])
+  productoId Int
+  cantidad  Int
+  precioUnitario Decimal @db.Decimal(10, 2)
+}
