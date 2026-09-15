@@ -1,17 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
-import MarcasPage from '../pages/MarcasPage';
-import CategoriaNivel2Page from '../pages/CategoriaNivel2Page';
-import CategoriaNivel1Page from '../pages/CategoriaNivel1Page';
-import ProveedorPage from '../pages/ProveedorPage';
-import ProvinciasPage from '../pages/ProvinciaPage';
-import LocalidadesPage from '../pages/LocalidadPage';
-import SucursalPage from '../pages/SucursalPage';
-import ClientePage from '../pages/ClientePage';
-import DepositoPage from '../pages/DepositoPage';
-import UsuarioPage from '../pages/UsuarioPage';
-import ProductoPage from '../pages/ProductoPage';
-import StockProductoDepositoPage from '../pages/StockProductoDepositoPage';
-import PresupuestoPage from '../pages/PresupuestoPage';
+import MarcasPage from '../entities/marca';
+import CategoriaNivel2Page from '../entities/categoria-nivel2';
+import CategoriaNivel1Page from '../entities/categoria-nivel1';
+import ProveedorPage from '../entities/proveedor';
+import ProvinciasPage from '../entities/provincia';
+import LocalidadesPage from '../entities/localidad';
+import SucursalPage from '../entities/sucursal';
+import ClientePage from '../entities/cliente';
+import DepositoPage from '../entities/deposito';
+import UsuarioPage from '../entities/usuario';
+import ProductoPage from '../entities/producto';
+import StockProductoDepositoPage from '../entities/stock-producto-deposito';
+import PresupuestoPage from '../entities/presupuesto';
 import AppLayout from '../components/AppLayout';
 
 function AppRouter() {
