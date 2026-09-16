@@ -19,16 +19,21 @@ import {
   Popconfirm,
   Switch,
   message,
+  Grid,
 } from 'antd';
 import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
 
+const { useBreakpoint } = Grid;
+
 function MarcasPage() {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
+
+  const screens = useBreakpoint();
 
   const fetchMarcas = async () => {
     try {
@@ -108,7 +113,11 @@ function MarcasPage() {
       <Title level={2}>Marcas</Title>
 
       <Card style={{ marginBottom: 24 }}>
-        <Form form={form} onFinish={onFinish} layout="inline">
+        <Form
+          form={form}
+          onFinish={onFinish}
+          layout={screens.xs ? 'vertical' : 'inline'}
+        >
           <Form.Item
             name="nombre"
             label="Nombre"
@@ -150,6 +159,7 @@ function MarcasPage() {
         <Table
           dataSource={marcasFiltradas}
           rowKey="id"
+          scroll={{ x: 500 }}
           columns={[
             {
               title: 'Nombre',

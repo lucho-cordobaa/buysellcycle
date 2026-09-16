@@ -25,11 +25,14 @@ import {
   Switch,
   message,
   Popconfirm,
+  Grid,
 } from 'antd';
 import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
+
+const { useBreakpoint } = Grid;
 
 function ProductoPage() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -37,6 +40,8 @@ function ProductoPage() {
   const [categorias, setCategorias] = useState<CategoriaNivel2[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
+
+  const screens = useBreakpoint();
 
   const fetchProductos = async () => {
     try {
@@ -164,7 +169,11 @@ function ProductoPage() {
       <Title level={2}>Productos</Title>
 
       <Card style={{ marginBottom: 24 }}>
-        <Form form={form} onFinish={onFinish} layout="inline">
+        <Form
+          form={form}
+          onFinish={onFinish}
+          layout={screens.xs ? 'vertical' : 'inline'}
+        >
           <Form.Item
             name="nombre"
             label="Nombre"
@@ -244,6 +253,7 @@ function ProductoPage() {
         <Table
           dataSource={productosFiltrados}
           rowKey="id"
+          scroll={{ x: 1500 }}
           columns={[
             {
               title: 'Nombre',

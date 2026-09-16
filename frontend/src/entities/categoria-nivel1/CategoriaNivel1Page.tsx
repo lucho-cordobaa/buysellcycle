@@ -19,16 +19,21 @@ import {
   Switch,
   message,
   Popconfirm,
+  Grid,
 } from 'antd';
 import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
 
+const { useBreakpoint } = Grid;
+
 function CategoriaNivel1Page() {
   const [categorias, setCategorias] = useState<CategoriaNivel1[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
+
+  const screens = useBreakpoint();
 
   const fetchCategorias = async () => {
     try {
@@ -108,7 +113,11 @@ function CategoriaNivel1Page() {
       <Title level={2}>Categorías Nivel 1</Title>
 
       <Card style={{ marginBottom: 24 }}>
-        <Form form={form} onFinish={onFinish} layout="inline">
+        <Form
+          form={form}
+          onFinish={onFinish}
+          layout={screens.xs ? 'vertical' : 'inline'}
+        >
           <Form.Item
             name="nombre"
             label="Nombre"
@@ -150,6 +159,7 @@ function CategoriaNivel1Page() {
         <Table
           dataSource={categoriasFiltradas}
           rowKey="id"
+          scroll={{ x: 450 }}
           columns={[
             {
               title: 'Nombre',

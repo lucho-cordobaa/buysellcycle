@@ -27,11 +27,14 @@ import {
   Switch,
   message,
   Popconfirm,
+  Grid,
 } from 'antd';
 import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
+
+const { useBreakpoint } = Grid;
 
 function StockProductoDepositoPage() {
   const [stocks, setStocks] = useState<StockProductoDeposito[]>([]);
@@ -39,6 +42,8 @@ function StockProductoDepositoPage() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
+
+  const screens = useBreakpoint();
 
   const fetchStocks = async () => {
     try {
@@ -259,7 +264,7 @@ function StockProductoDepositoPage() {
                 <Form
                   form={formIngreso}
                   onFinish={onFinishIngreso}
-                  layout="inline"
+                  layout={screens.xs ? 'vertical' : 'inline'}
                 >
                   <Form.Item
                     name="depositoId"
@@ -457,6 +462,7 @@ function StockProductoDepositoPage() {
         <Table
           dataSource={stocksFiltrados}
           rowKey="id"
+          scroll={{ x: 1000 }}
           columns={[
             {
               title: 'Depósito',

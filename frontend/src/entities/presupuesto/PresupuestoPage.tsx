@@ -26,11 +26,14 @@ import {
   message,
   Popconfirm,
   Modal,
+  Grid,
 } from 'antd';
 import { DeleteOutlined, UndoOutlined, EyeOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
+
+const { useBreakpoint } = Grid;
 
 const coloresEstado: Record<string, string> = {
   PENDIENTE: 'gold',
@@ -47,6 +50,8 @@ function PresupuestoPage() {
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
   const [presupuestoSeleccionado, setPresupuestoSeleccionado] =
     useState<Presupuesto | null>(null);
+
+  const screens = useBreakpoint();
 
   const fetchPresupuestos = async () => {
     try {
@@ -180,7 +185,11 @@ function PresupuestoPage() {
     <div>
       <Title level={2}>Presupuestos</Title>
       <Card style={{ marginBottom: 24 }}>
-        <Form form={form} onFinish={onFinish} layout="vertical">
+        <Form
+          form={form}
+          onFinish={onFinish}
+          layout={screens.xs ? 'vertical' : 'inline'}
+        >
           <Space>
             <Form.Item
               name="clienteId"
@@ -266,6 +275,7 @@ function PresupuestoPage() {
         <Table
           dataSource={presupuestosFiltrados}
           rowKey="id"
+          scroll={{ x: 800 }}
           columns={[
             {
               title: 'Cliente',

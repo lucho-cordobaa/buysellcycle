@@ -1,4 +1,4 @@
-import { Layout, Menu } from 'antd';
+import { Layout, Menu, Button } from 'antd';
 import { Link, Outlet, useLocation } from 'react-router';
 import {
   TagOutlined,
@@ -14,7 +14,10 @@ import {
   ShoppingOutlined,
   SwapOutlined,
   FileTextOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from '@ant-design/icons';
+import { useState } from 'react';
 
 const { Sider, Content, Header } = Layout;
 
@@ -116,10 +119,16 @@ const items = [
 
 function AppLayout() {
   const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider>
+      <Sider
+        breakpoint="lg"
+        collapsedWidth="0"
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+      >
         <div
           style={{
             color: 'white',
@@ -139,7 +148,20 @@ function AppLayout() {
         />
       </Sider>
       <Layout>
-        <Header style={{ background: '#fff', padding: '0 24px' }} />
+        <Header
+          style={{
+            background: '#fff',
+            padding: '0 16px',
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <Button
+            type="text"
+            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            onClick={() => setCollapsed(!collapsed)}
+          />
+        </Header>
         <Content style={{ padding: 24 }}>
           <Outlet />
         </Content>
