@@ -60,7 +60,7 @@ function SucursalPage() {
       const data = await getLocalidades();
       setLocalidades(data);
     } catch (error) {
-      console.error('Error fetching localidad:', error);
+      console.error('Error fetching localidades:', error);
     }
   };
 

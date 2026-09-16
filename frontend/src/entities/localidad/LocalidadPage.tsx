@@ -99,7 +99,7 @@ function LocalidadesPage() {
   const handleReactivar = async (localidad: Localidad) => {
     try {
       await reactivarLocalidad(localidad.id);
-      message.success('Marca reactivada correctamente');
+      message.success('Localidad reactivada correctamente');
       fetchLocalidades();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -141,9 +141,9 @@ function LocalidadesPage() {
             <Input placeholder="Ej: Rafaela" />
           </Form.Item>
           <Form.Item
-            name="provincia"
+            name="provinciaId"
             label="Provincia"
-            rules={[{ required: true, message: 'Seleccione una localidad' }]}
+            rules={[{ required: true, message: 'Seleccione una provincia' }]}
           >
             <Select style={{ width: 200 }} options={opcionesProvincias} />
           </Form.Item>

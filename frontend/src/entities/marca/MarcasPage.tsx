@@ -115,7 +115,7 @@ function MarcasPage() {
             rules={[
               {
                 required: true,
-                message: 'Por favor, ingrese el nombre de la marca',
+                message: 'Por favor, ingrese el nombre',
               },
             ]}
           >

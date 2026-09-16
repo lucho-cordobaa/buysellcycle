@@ -1,13 +1,16 @@
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 
 export class CreateStockProductoDepositoDto {
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   depositoId!: number;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   productoId!: number;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   stock!: number;
 }

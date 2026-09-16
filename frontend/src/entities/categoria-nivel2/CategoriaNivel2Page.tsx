@@ -64,10 +64,12 @@ function CategoriaNivel2Page() {
 
   const [form] = Form.useForm();
 
-  const opcionesCategoriaNivel1 = categoriasNivel1.map((categoria) => ({
-    value: categoria.id,
-    label: categoria.nombre,
-  }));
+  const opcionesCategoriaNivel1 = categoriasNivel1
+    .filter((categoria) => !categoria.archivado)
+    .map((categoria) => ({
+      value: categoria.id,
+      label: categoria.nombre,
+    }));
 
   const onFinish = async (values: {
     nombre: string;
@@ -104,7 +106,7 @@ function CategoriaNivel2Page() {
   const handleReactivar = async (categoria: CategoriaNivel2) => {
     try {
       await reactivarCategoriaNivel2(categoria.id);
-      message.success('Marca reactivada correctamente');
+      message.success('Categoria reactivada correctamente');
       fetchCategorias();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

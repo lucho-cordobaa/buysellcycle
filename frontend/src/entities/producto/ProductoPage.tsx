@@ -79,15 +79,13 @@ function ProductoPage() {
 
   const [form] = Form.useForm();
 
-  const opcionesMarcas = marcas.map((producto) => ({
-    value: producto.id,
-    label: producto.nombre,
-  }));
+  const opcionesMarcas = marcas
+    .filter((m) => !m.archivado)
+    .map((m) => ({ value: m.id, label: m.nombre }));
 
-  const opcionesCategorias = categorias.map((producto) => ({
-    value: producto.id,
-    label: producto.nombre,
-  }));
+  const opcionesCategorias = categorias
+    .filter((c) => !c.archivado)
+    .map((c) => ({ value: c.id, label: c.nombre }));
 
   const onFinish = async (values: {
     nombre: string;

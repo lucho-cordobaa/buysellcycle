@@ -1,14 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { CreateProvinciaDto } from './dto/create-provincia.dto';
 import { UpdateProvinciaDto } from './dto/update-provincia.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '../../generated/prisma/client';
 
 @Injectable()
 export class ProvinciaService {
   constructor(private prisma: PrismaService) {}
 
   create(createProvinciaDto: CreateProvinciaDto) {
-    return this.prisma.provincia.create({ data: createProvinciaDto });
+    try {
+      return this.prisma.provincia.create({ data: createProvinciaDto });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new BadRequestException('Ya existe una provincia con ese nombre');
+      }
+      throw error;
+    }
   }
 
   findAll() {
@@ -20,10 +31,20 @@ export class ProvinciaService {
   }
 
   update(id: number, updateProvinciaDto: UpdateProvinciaDto) {
-    return this.prisma.provincia.update({
-      where: { id },
-      data: updateProvinciaDto,
-    });
+    try {
+      return this.prisma.provincia.update({
+        where: { id },
+        data: updateProvinciaDto,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new BadRequestException('Ya existe una provincia con ese nombre');
+      }
+      throw error;
+    }
   }
 
   remove(id: number) {

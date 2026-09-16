@@ -79,14 +79,18 @@ function StockProductoDepositoPage() {
     fetchProductos();
   }, []);
 
-  const opcionesDepositos = depositos.map((d) => ({
-    value: d.id,
-    label: d.nombre,
-  }));
-  const opcionesProductos = productos.map((p) => ({
-    value: p.id,
-    label: p.nombre,
-  }));
+  const opcionesDepositos = depositos
+    .filter((deposito) => !deposito.archivado)
+    .map((deposito) => ({
+      value: deposito.id,
+      label: deposito.nombre,
+    }));
+  const opcionesProductos = productos
+    .filter((producto) => !producto.archivado)
+    .map((producto) => ({
+      value: producto.id,
+      label: producto.nombre,
+    }));
 
   const [formIngreso] = Form.useForm();
   const onFinishIngreso = async (values: {
@@ -148,6 +152,35 @@ function StockProductoDepositoPage() {
       }
     }
   };
+
+  const depositoSeleccionadoEgreso = Form.useWatch('depositoId', formEgreso);
+  const productosDelDepositoEgreso = stocks
+    .filter((s) => s.depositoId === depositoSeleccionadoEgreso && !s.archivado)
+    .map((s) => productos.find((p) => p.id === s.productoId))
+    .filter((producto): producto is Producto => producto !== undefined);
+
+  const opcionesProductosEgreso = productosDelDepositoEgreso
+    .filter((producto) => !producto.archivado)
+    .map((producto) => ({
+      value: producto.id,
+      label: producto.nombre,
+    }));
+
+  const depositoOrigenSeleccionado = Form.useWatch(
+    'depositoOrigenId',
+    formTransferencia,
+  );
+  const productosDelDepositoOrigen = stocks
+    .filter((s) => s.depositoId === depositoOrigenSeleccionado && !s.archivado)
+    .map((s) => productos.find((p) => p.id === s.productoId))
+    .filter((p): p is Producto => p !== undefined);
+
+  const opcionesProductosTransferencia = productosDelDepositoOrigen
+    .filter((p) => !p.archivado)
+    .map((p) => ({
+      value: p.id,
+      label: p.nombre,
+    }));
 
   const [form] = Form.useForm();
   const handleEdit = (stock: StockProductoDeposito) => {
@@ -280,6 +313,9 @@ function StockProductoDepositoPage() {
                     <Select
                       style={{ width: 180 }}
                       options={opcionesDepositos}
+                      onChange={() =>
+                        formEgreso.setFieldValue('productoId', undefined)
+                      }
                     />
                   </Form.Item>
                   <Form.Item
@@ -289,7 +325,7 @@ function StockProductoDepositoPage() {
                   >
                     <Select
                       style={{ width: 180 }}
-                      options={opcionesProductos}
+                      options={opcionesProductosEgreso}
                     />
                   </Form.Item>
                   <Form.Item
@@ -324,6 +360,9 @@ function StockProductoDepositoPage() {
                     <Select
                       style={{ width: 180 }}
                       options={opcionesDepositos}
+                      onChange={() =>
+                        formTransferencia.setFieldValue('productoId', undefined)
+                      }
                     />
                   </Form.Item>
                   <Form.Item
@@ -343,7 +382,7 @@ function StockProductoDepositoPage() {
                   >
                     <Select
                       style={{ width: 180 }}
-                      options={opcionesProductos}
+                      options={opcionesProductosTransferencia}
                     />
                   </Form.Item>
                   <Form.Item

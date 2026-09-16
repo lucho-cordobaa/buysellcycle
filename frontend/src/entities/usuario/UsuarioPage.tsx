@@ -4,8 +4,9 @@ import {
   createUsuario,
   updateUsuario,
   deleteUsuario,
+  reactivarUsuario,
 } from './services/usuario';
-import { getSucursales, reactivarSucursal } from '../sucursal/services/sucursal';
+import { getSucursales } from '../sucursal/services/sucursal';
 import type { Usuario } from './types/usuario';
 import type { Sucursal } from '../sucursal/types/sucursal';
 import {
@@ -62,10 +63,12 @@ function UsuarioPage() {
 
   const [form] = Form.useForm();
 
-  const opcionesSucursales = sucursales.map((usuario) => ({
-    value: usuario.id,
-    label: usuario.nombre,
-  }));
+  const opcionesSucursales = sucursales
+    .filter((usuario) => !usuario.archivado)
+    .map((usuario) => ({
+      value: usuario.id,
+      label: usuario.nombre,
+    }));
 
   const opcionesRoles = [
     {
@@ -120,9 +123,9 @@ function UsuarioPage() {
 
   const handleReactivar = async (usuario: Usuario) => {
     try {
-      await reactivarSucursal(usuario.id);
+      await reactivarUsuario(usuario.id);
       message.success('Usuario reactivado correctamente');
-      fetchSucursales();
+      fetchUsuarios();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         message.error(error.response.data.message);
@@ -135,7 +138,7 @@ function UsuarioPage() {
   const handleDelete = async (id: number) => {
     try {
       await deleteUsuario(id);
-      message.success('Marca archivada correctamente');
+      message.success('Usuario archivado correctamente');
       fetchUsuarios();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {

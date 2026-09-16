@@ -49,10 +49,33 @@ export class ProductoService {
   }
 
   async update(id: number, updateProductoDto: UpdateProductoDto) {
+    const productoActual = await this.prisma.producto.findUnique({
+      where: { id },
+    });
+
+    if (!productoActual) {
+      throw new BadRequestException('Producto no encontrado');
+    }
+
+    const costoNeto =
+      updateProductoDto.costoNeto ?? Number(productoActual.costoNeto);
+    const utilidad =
+      updateProductoDto.utilidad ?? Number(productoActual.utilidad);
+    const descuentoContado =
+      updateProductoDto.descuentoContado ??
+      Number(productoActual.descuentoContado);
+
+    const precioLista = costoNeto + (costoNeto * utilidad) / 100;
+    const precioContado = precioLista - (precioLista * descuentoContado) / 100;
+
     try {
       return await this.prisma.producto.update({
         where: { id },
-        data: updateProductoDto,
+        data: {
+          ...updateProductoDto,
+          precioLista,
+          precioContado,
+        },
       });
     } catch (error) {
       if (

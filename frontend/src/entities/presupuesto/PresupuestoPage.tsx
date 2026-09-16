@@ -25,8 +25,9 @@ import {
   Switch,
   message,
   Popconfirm,
+  Modal,
 } from 'antd';
-import { DeleteOutlined, UndoOutlined } from '@ant-design/icons';
+import { DeleteOutlined, UndoOutlined, EyeOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
@@ -44,6 +45,8 @@ function PresupuestoPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
+  const [presupuestoSeleccionado, setPresupuestoSeleccionado] =
+    useState<Presupuesto | null>(null);
 
   const fetchPresupuestos = async () => {
     try {
@@ -97,18 +100,24 @@ function PresupuestoPage() {
     fetchProductos();
   }, []);
 
-  const opcionesClientes = clientes.map((cliente) => ({
-    value: cliente.id,
-    label: `${cliente.nombre} ${cliente.apellido}`,
-  }));
-  const opcionesUsuarios = usuarios.map((usuario) => ({
-    value: usuario.id,
-    label: `${usuario.nombre} ${usuario.apellido}`,
-  }));
-  const opcionesProductos = productos.map((producto) => ({
-    value: producto.id,
-    label: producto.nombre,
-  }));
+  const opcionesClientes = clientes
+    .filter((cliente) => !cliente.archivado)
+    .map((cliente) => ({
+      value: cliente.id,
+      label: `${cliente.nombre} ${cliente.apellido}`,
+    }));
+  const opcionesUsuarios = usuarios
+    .filter((usuario) => !usuario.archivado)
+    .map((usuario) => ({
+      value: usuario.id,
+      label: `${usuario.nombre} ${usuario.apellido}`,
+    }));
+  const opcionesProductos = productos
+    .filter((producto) => !producto.archivado)
+    .map((producto) => ({
+      value: producto.id,
+      label: producto.nombre,
+    }));
 
   const [form] = Form.useForm();
 
@@ -157,6 +166,10 @@ function PresupuestoPage() {
         message.error('Ocurrió un error inesperado');
       }
     }
+  };
+
+  const handleVer = (presupuesto: Presupuesto) => {
+    setPresupuestoSeleccionado(presupuesto);
   };
 
   const presupuestosFiltrados = presupuestos.filter(
@@ -295,32 +308,101 @@ function PresupuestoPage() {
             {
               title: 'Acciones',
               key: 'acciones',
-              render: (_, record: Presupuesto) =>
-                record.archivado ? (
-                  <Popconfirm
-                    title="¿Reactivar este presupuesto?"
-                    onConfirm={() => handleReactivar(record)}
-                    okText="Sí"
-                    cancelText="No"
+              render: (_, record: Presupuesto) => (
+                <Space>
+                  <Button
+                    icon={<EyeOutlined />}
+                    onClick={() => handleVer(record)}
                   >
-                    <Button icon={<UndoOutlined />}>Reactivar</Button>
-                  </Popconfirm>
-                ) : (
-                  <Popconfirm
-                    title="¿Archivar este presupuesto?"
-                    onConfirm={() => handleDelete(record.id)}
-                    okText="Sí"
-                    cancelText="No"
-                  >
-                    <Button danger icon={<DeleteOutlined />}>
-                      Archivar
-                    </Button>
-                  </Popconfirm>
-                ),
+                    Ver
+                  </Button>
+                  {record.archivado ? (
+                    <Popconfirm
+                      title="¿Reactivar este presupuesto?"
+                      onConfirm={() => handleReactivar(record)}
+                      okText="Sí"
+                      cancelText="No"
+                    >
+                      <Button icon={<UndoOutlined />}>Reactivar</Button>
+                    </Popconfirm>
+                  ) : (
+                    <Popconfirm
+                      title="¿Archivar este presupuesto?"
+                      onConfirm={() => handleDelete(record.id)}
+                      okText="Sí"
+                      cancelText="No"
+                    >
+                      <Button danger icon={<DeleteOutlined />}>
+                        Archivar
+                      </Button>
+                    </Popconfirm>
+                  )}
+                </Space>
+              ),
             },
           ]}
         />
       </Card>
+      <Modal
+        title="Detalle del Presupuesto"
+        open={presupuestoSeleccionado !== null}
+        onCancel={() => setPresupuestoSeleccionado(null)}
+        footer={null}
+      >
+        {presupuestoSeleccionado && (
+          <>
+            <p>
+              <strong>Cliente:</strong>{' '}
+              {
+                clientes.find((c) => c.id === presupuestoSeleccionado.clienteId)
+                  ?.nombre
+              }{' '}
+              {
+                clientes.find((c) => c.id === presupuestoSeleccionado.clienteId)
+                  ?.apellido
+              }
+            </p>
+            <p>
+              <strong>Estado:</strong>{' '}
+              <Tag
+                color={
+                  coloresEstado[presupuestoSeleccionado.estado] ?? 'default'
+                }
+              >
+                {presupuestoSeleccionado.estado}
+              </Tag>
+            </p>
+            <Table
+              dataSource={presupuestoSeleccionado.detallePresupuesto}
+              rowKey="id"
+              pagination={false}
+              columns={[
+                {
+                  title: 'Producto',
+                  key: 'producto',
+                  render: (_, item) =>
+                    productos.find((p) => p.id === item.productoId)?.nombre ??
+                    item.productoId,
+                },
+                {
+                  title: 'Cantidad',
+                  dataIndex: 'cantidad',
+                  key: 'cantidad',
+                },
+                {
+                  title: 'Precio Unitario',
+                  dataIndex: 'precioUnitario',
+                  key: 'precioUnitario',
+                  render: (precio: string) => `$${precio}`,
+                },
+              ]}
+            />
+            <p style={{ marginTop: 16, textAlign: 'right' }}>
+              <strong>Total: ${presupuestoSeleccionado.total}</strong>
+            </p>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

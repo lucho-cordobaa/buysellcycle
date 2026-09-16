@@ -60,7 +60,7 @@ function ClientePage() {
       const data = await getLocalidades();
       setLocalidades(data);
     } catch (error) {
-      console.error('Error fetching localidad:', error);
+      console.error('Error fetching localidades:', error);
     }
   };
 
@@ -78,10 +78,12 @@ function ClientePage() {
 
   const [form] = Form.useForm();
 
-  const opcionesProvincias = provincias.map((sucursal) => ({
-    value: sucursal.id,
-    label: sucursal.nombre,
-  }));
+  const opcionesProvincias = provincias
+    .filter((sucursal) => !sucursal.archivado)
+    .map((sucursal) => ({
+      value: sucursal.id,
+      label: sucursal.nombre,
+    }));
 
   const provinciaSeleccionada = Form.useWatch('provinciaId', form);
 
