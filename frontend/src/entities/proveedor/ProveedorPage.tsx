@@ -140,9 +140,13 @@ function ProveedorPage() {
                 required: true,
                 message: 'Por favor, ingrese el cuit del proveedor',
               },
+              {
+                pattern: /^\d{2}-\d{8}-\d$/,
+                message: 'El CUIT debe tener el formato XX-XXXXXXXX-X',
+              },
             ]}
           >
-            <Input placeholder="Ej: 12-34567891-2" />
+            <Input placeholder="Ej: 12-34567891-2" maxLength={13} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">

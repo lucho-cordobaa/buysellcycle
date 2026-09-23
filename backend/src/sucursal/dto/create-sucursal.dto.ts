@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsPositive } from 'class-validator';
 
 export class CreateSucursalDto {
   @IsString()
@@ -6,8 +6,10 @@ export class CreateSucursalDto {
   nombre!: string;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   provinciaId!: number;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   localidadId!: number;
 }

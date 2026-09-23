@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsPositive, IsString } from 'class-validator';
 
 export class CreateLocalidadDto {
   @IsString()
@@ -6,5 +6,6 @@ export class CreateLocalidadDto {
   nombre!: string;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   provinciaId!: number;
 }

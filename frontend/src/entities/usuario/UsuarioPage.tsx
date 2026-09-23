@@ -184,9 +184,15 @@ function UsuarioPage() {
           <Form.Item
             name="dni"
             label="Dni"
-            rules={[{ required: true, message: 'Ingrese el dni' }]}
+            rules={[
+              { required: true, message: 'Ingrese el DNI' },
+              {
+                pattern: /^\d{7,8}$/,
+                message: 'El DNI debe tener 7 u 8 dígitos',
+              },
+            ]}
           >
-            <Input />
+            <Input maxLength={8} inputMode="numeric" />
           </Form.Item>
           <Form.Item
             name="rol"

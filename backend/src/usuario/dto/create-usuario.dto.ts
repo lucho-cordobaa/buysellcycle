@@ -1,4 +1,11 @@
-import { IsEnum, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsPositive,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { Rol } from '../../../generated/prisma/enums';
 
 export class CreateUsuarioDto {
@@ -10,6 +17,7 @@ export class CreateUsuarioDto {
   apellido!: string;
   @IsString()
   @IsNotEmpty()
+  @Matches(/^\d{7,8}$/, { message: 'El DNI debe tener 7 u 8 dígitos' })
   dni!: string;
   @IsEnum(Rol)
   rol!: Rol;
@@ -18,5 +26,6 @@ export class CreateUsuarioDto {
   nombreUsuario!: string;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   sucursalId!: number;
 }

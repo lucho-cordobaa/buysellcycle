@@ -48,11 +48,17 @@ export class StockProductoDepositoService {
   ) {
     return this.prisma.$transaction(async (tx) => {
       try {
+        const stockAnterior = await tx.stockProductoDeposito.findUniqueOrThrow({
+          where: { id },
+        });
         const stockActualizado = await tx.stockProductoDeposito.update({
           where: { id },
           data: updateStockProductoDepositoDto,
         });
 
+        if (stockAnterior.productoId !== stockActualizado.productoId) {
+          await this.recalcularStockTotal(stockAnterior.productoId, tx);
+        }
         await this.recalcularStockTotal(stockActualizado.productoId, tx);
 
         return stockActualizado;
@@ -98,7 +104,7 @@ export class StockProductoDepositoService {
     return this.prisma.$transaction(async (tx) => {
       const stockActualizado = await tx.stockProductoDeposito.upsert({
         where: { depositoId_productoId: { depositoId, productoId } },
-        update: { stock: { increment: cantidad } },
+        update: { stock: { increment: cantidad }, archivado: false },
         create: { depositoId, productoId, stock: cantidad },
       });
 
@@ -140,6 +146,12 @@ export class StockProductoDepositoService {
   async transferirStock(dto: TransferenciaStockDto) {
     const { depositoOrigenId, depositoDestinoId, productoId, cantidad } = dto;
 
+    if (depositoOrigenId === depositoDestinoId) {
+      throw new BadRequestException(
+        'El depósito de origen y destino deben ser distintos',
+      );
+    }
+
     return this.prisma.$transaction(async (tx) => {
       const resultadoOrigen = await tx.stockProductoDeposito.updateMany({
         where: {
@@ -161,11 +173,12 @@ export class StockProductoDepositoService {
         where: {
           depositoId_productoId: { depositoId: depositoDestinoId, productoId },
         },
-        update: { stock: { increment: cantidad } },
+        update: { stock: { increment: cantidad }, archivado: false },
         create: { depositoId: depositoDestinoId, productoId, stock: cantidad },
       });
 
       await this.actualizarFechaMovimiento(productoId, tx);
+      await this.recalcularStockTotal(productoId, tx);
 
       const origenActualizado = await tx.stockProductoDeposito.findUnique({
         where: {
@@ -199,7 +212,10 @@ export class StockProductoDepositoService {
 
     await tx.producto.update({
       where: { id: productoId },
-      data: { stockTotal },
+      data: {
+        stockTotal,
+        ...(stockTotal > 0 ? { estado: 'DISPONIBLE' } : {}),
+      },
     });
   }
 

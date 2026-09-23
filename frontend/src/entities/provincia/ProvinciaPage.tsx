@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  getProvincias,
   createProvincia,
   deleteProvincia,
   updateProvincia,
@@ -23,30 +22,25 @@ import {
 } from 'antd';
 import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useProvinciaStore } from '../../store/provinciaStore';
 
 const { Title } = Typography;
 
 const { useBreakpoint } = Grid;
 
 function ProvinciasPage() {
-  const [provincias, setProvincias] = useState<Provincia[]>([]);
+  const provincias = useProvinciaStore((state) => state.provincias);
+  const cargarProvincias = useProvinciaStore((state) => state.cargarProvincias);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
 
   const screens = useBreakpoint();
 
-  const fetchProvincias = async () => {
-    try {
-      const data = await getProvincias();
-      setProvincias(data);
-    } catch (error) {
-      console.error('Error fetching provincias:', error);
-    }
-  };
-
   useEffect(() => {
-    fetchProvincias();
-  }, []);
+    void cargarProvincias().catch((error: unknown) => {
+      console.error('Error fetching provincias:', error);
+    });
+  }, [cargarProvincias]);
 
   const [form] = Form.useForm();
 
@@ -61,7 +55,7 @@ function ProvinciasPage() {
       }
       setEditandoId(null);
       form.resetFields();
-      fetchProvincias();
+      await cargarProvincias();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         message.error(error.response.data.message);
@@ -75,7 +69,7 @@ function ProvinciasPage() {
     try {
       await deleteProvincia(id);
       message.success('Provincia archivada correctamente');
-      fetchProvincias();
+      await cargarProvincias();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         message.error(error.response.data.message);
@@ -89,7 +83,7 @@ function ProvinciasPage() {
     try {
       await reactivarProvincia(provincia.id);
       message.success('Provincia reactivada correctamente');
-      fetchProvincias();
+      await cargarProvincias();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         message.error(error.response.data.message);

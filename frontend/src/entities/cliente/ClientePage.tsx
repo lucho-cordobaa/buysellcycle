@@ -6,10 +6,8 @@ import {
   deleteCliente,
   reactivarCliente,
 } from './services/cliente';
-import { getProvincias } from '../provincia/services/provincia';
 import { getLocalidades } from '../localidad/services/localidad';
 import type { Cliente } from './types/cliente';
-import type { Provincia } from '../provincia/types/provincia';
 import type { Localidad } from '../localidad/types/localidad';
 import {
   Table,
@@ -28,6 +26,7 @@ import {
 } from 'antd';
 import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useProvinciaStore } from '../../store/provinciaStore';
 
 const { Title } = Typography;
 
@@ -35,7 +34,8 @@ const { useBreakpoint } = Grid;
 
 function ClientePage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [provincias, setProvincias] = useState<Provincia[]>([]);
+  const provincias = useProvinciaStore((state) => state.provincias);
+  const cargarProvincias = useProvinciaStore((state) => state.cargarProvincias);
   const [localidades, setLocalidades] = useState<Localidad[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
@@ -48,15 +48,6 @@ function ClientePage() {
       setClientes(data);
     } catch (error) {
       console.error('Error fetching clientes:', error);
-    }
-  };
-
-  const fetchProvincias = async () => {
-    try {
-      const data = await getProvincias();
-      setProvincias(data);
-    } catch (error) {
-      console.error('Error fetching provincias:', error);
     }
   };
 
@@ -74,8 +65,10 @@ function ClientePage() {
   }, []);
 
   useEffect(() => {
-    fetchProvincias();
-  }, []);
+    void cargarProvincias().catch((error: unknown) => {
+      console.error('Error fetching provincias:', error);
+    });
+  }, [cargarProvincias]);
 
   useEffect(() => {
     fetchLocalidades();
@@ -194,9 +187,15 @@ function ClientePage() {
           <Form.Item
             name="dni"
             label="Dni"
-            rules={[{ required: true, message: 'Ingrese el dni' }]}
+            rules={[
+              { required: true, message: 'Ingrese el DNI' },
+              {
+                pattern: /^\d{7,8}$/,
+                message: 'El DNI debe tener 7 u 8 dígitos',
+              },
+            ]}
           >
-            <Input />
+            <Input maxLength={8} inputMode="numeric" />
           </Form.Item>
           <Form.Item
             name="email"

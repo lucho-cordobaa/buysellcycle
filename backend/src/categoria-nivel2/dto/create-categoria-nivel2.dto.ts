@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsPositive } from 'class-validator';
 
 export class CreateCategoriaNivel2Dto {
   @IsString()
@@ -6,5 +6,6 @@ export class CreateCategoriaNivel2Dto {
   nombre!: string;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   categoriaNivel1Id!: number;
 }

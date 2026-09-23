@@ -1,4 +1,11 @@
-import { IsEmail, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsInt,
+  IsNotEmpty,
+  IsPositive,
+  IsString,
+  Matches,
+} from 'class-validator';
 
 export class CreateClienteDto {
   @IsString()
@@ -9,6 +16,7 @@ export class CreateClienteDto {
   apellido!: string;
   @IsString()
   @IsNotEmpty()
+  @Matches(/^\d{7,8}$/, { message: 'El DNI debe tener 7 u 8 dígitos' })
   dni!: string;
   @IsEmail()
   @IsString()
@@ -16,8 +24,10 @@ export class CreateClienteDto {
   email!: string;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   provinciaId!: number;
   @IsInt()
   @IsNotEmpty()
+  @IsPositive()
   localidadId!: number;
 }
