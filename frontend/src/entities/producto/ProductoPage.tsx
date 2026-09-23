@@ -164,6 +164,12 @@ function ProductoPage() {
     (producto) => mostrarArchivados || !producto.archivado,
   );
 
+  const coloresEstadoProducto: Record<string, string> = {
+    DISPONIBLE: 'green',
+    ACTIVO: 'gold',
+    INACTIVO: 'default',
+  };
+
   return (
     <div>
       <Title level={2}>Productos</Title>
@@ -275,6 +281,11 @@ function ProductoPage() {
                 ]
               : []),
             {
+              title: 'StockTotal',
+              dataIndex: 'stockTotal',
+              key: 'stockTotal',
+            },
+            {
               title: 'CostoNeto',
               dataIndex: 'costoNeto',
               key: 'costoNeto',
@@ -303,6 +314,16 @@ function ProductoPage() {
               render: (categoriaNivel2Id: number) =>
                 categorias.find((c) => c.id === categoriaNivel2Id)?.nombre ??
                 categoriaNivel2Id,
+            },
+            {
+              title: 'Estado',
+              dataIndex: 'estado',
+              key: 'estado',
+              render: (estado: string) => (
+                <Tag color={coloresEstadoProducto[estado] ?? 'default'}>
+                  {estado}
+                </Tag>
+              ),
             },
             {
               title: 'Acciones',
