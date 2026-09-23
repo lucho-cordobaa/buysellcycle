@@ -8,9 +8,16 @@ import { Prisma } from '../../generated/prisma/client';
 export class DepositoService {
   constructor(private prisma: PrismaService) {}
 
-  create(createDepositoDto: CreateDepositoDto) {
+  async create(createDepositoDto: CreateDepositoDto) {
     try {
-      return this.prisma.deposito.create({ data: createDepositoDto });
+      const total = await this.prisma.deposito.count();
+      const codigo = `DEP-${String(total + 1).padStart(2, '0')}`;
+      return await this.prisma.deposito.create({
+        data: {
+          ...createDepositoDto,
+          codigo,
+        },
+      });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

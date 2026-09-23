@@ -10,12 +10,24 @@ import { Prisma } from '../../generated/prisma/client';
 export class ProductoService {
   constructor(private prisma: PrismaService) {}
 
+  private calcularPrecios(
+    costoNeto: number,
+    utilidad: number,
+    descuentoContado: number,
+  ) {
+    const precioLista = costoNeto + (costoNeto * utilidad) / 100;
+    const precioContado = precioLista - (precioLista * descuentoContado) / 100;
+    return { precioLista, precioContado };
+  }
+
   async create(createProductoDto: CreateProductoDto) {
     const { costoNeto, utilidad, descuentoContado } = createProductoDto;
 
-    const precioLista = costoNeto + (costoNeto * utilidad) / 100;
-
-    const precioContado = precioLista - (precioLista * descuentoContado) / 100;
+    const { precioLista, precioContado } = this.calcularPrecios(
+      costoNeto,
+      utilidad,
+      descuentoContado,
+    );
 
     try {
       return await this.prisma.producto.create({
@@ -57,16 +69,21 @@ export class ProductoService {
       throw new BadRequestException('Producto no encontrado');
     }
 
-    const costoNeto =
-      updateProductoDto.costoNeto ?? Number(productoActual.costoNeto);
-    const utilidad =
-      updateProductoDto.utilidad ?? Number(productoActual.utilidad);
-    const descuentoContado =
-      updateProductoDto.descuentoContado ??
-      Number(productoActual.descuentoContado);
+    const costoNeto = Number(
+      updateProductoDto.costoNeto ?? productoActual.costoNeto,
+    );
+    const utilidad = Number(
+      updateProductoDto.utilidad ?? productoActual.utilidad,
+    );
+    const descuentoContado = Number(
+      updateProductoDto.descuentoContado ?? productoActual.descuentoContado,
+    );
 
-    const precioLista = costoNeto + (costoNeto * utilidad) / 100;
-    const precioContado = precioLista - (precioLista * descuentoContado) / 100;
+    const { precioLista, precioContado } = this.calcularPrecios(
+      costoNeto,
+      utilidad,
+      descuentoContado,
+    );
 
     try {
       return await this.prisma.producto.update({
