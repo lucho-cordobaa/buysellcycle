@@ -1,3 +1,4 @@
+import { filterSelectOption } from '../../utils/filterSelectOption';
 import { useEffect, useState } from 'react';
 import {
   getCategoriasNivel2,
@@ -162,7 +163,7 @@ function CategoriaNivel2Page() {
             label="Categoría Nivel 1"
             rules={[{ required: true, message: 'Seleccione una categoría' }]}
           >
-            <Select style={{ width: 200 }} options={opcionesCategoriaNivel1} />
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 200 }} options={opcionesCategoriaNivel1} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">

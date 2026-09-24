@@ -1,3 +1,4 @@
+import { filterSelectOption } from '../../utils/filterSelectOption';
 import { useState, useEffect } from 'react';
 import {
   getStockProductoDepositos,
@@ -103,6 +104,10 @@ function StockProductoDepositoPage() {
     productoId: number;
     cantidad: number;
   }) => {
+    if (!Number.isInteger(values.cantidad) || values.cantidad <= 0) {
+      message.error('La cantidad debe ser un entero positivo');
+      return;
+    }
     try {
       await ingresarStock(values);
       message.success('Stock ingresado correctamente');
@@ -123,6 +128,10 @@ function StockProductoDepositoPage() {
     productoId: number;
     cantidad: number;
   }) => {
+    if (!Number.isInteger(values.cantidad) || values.cantidad <= 0) {
+      message.error('La cantidad debe ser un entero positivo');
+      return;
+    }
     try {
       await egresoStock(values);
       message.success('Stock egresado correctamente');
@@ -144,6 +153,10 @@ function StockProductoDepositoPage() {
     productoId: number;
     cantidad: number;
   }) => {
+    if (!Number.isInteger(values.cantidad) || values.cantidad <= 0) {
+      message.error('La cantidad debe ser un entero positivo');
+      return;
+    }
     try {
       await transferirStock(values);
       message.success('Stock transferido correctamente');
@@ -269,9 +282,11 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="depositoId"
                     label="Depósito"
-                    rules={[{ required: true }]}
+                    rules={[
+                      { required: true, message: 'Seleccione un depósito' },
+                    ]}
                   >
-                    <Select
+                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesDepositos}
                     />
@@ -279,9 +294,11 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="productoId"
                     label="Producto"
-                    rules={[{ required: true }]}
+                    rules={[
+                      { required: true, message: 'Seleccione un producto' },
+                    ]}
                   >
-                    <Select
+                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesProductos}
                     />
@@ -289,9 +306,16 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="cantidad"
                     label="Cantidad"
-                    rules={[{ required: true }]}
+                    rules={[
+                      { required: true, message: 'La cantidad es obligatoria' },
+                      {
+                        type: 'integer',
+                        min: 1,
+                        message: 'La cantidad debe ser un entero positivo',
+                      },
+                    ]}
                   >
-                    <InputNumber min={1} />
+                    <InputNumber />
                   </Form.Item>
                   <Form.Item>
                     <Button type="primary" htmlType="submit">
@@ -313,9 +337,11 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="depositoId"
                     label="Depósito"
-                    rules={[{ required: true }]}
+                    rules={[
+                      { required: true, message: 'Seleccione un depósito' },
+                    ]}
                   >
-                    <Select
+                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesDepositos}
                       onChange={() =>
@@ -326,9 +352,11 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="productoId"
                     label="Producto"
-                    rules={[{ required: true }]}
+                    rules={[
+                      { required: true, message: 'Seleccione un producto' },
+                    ]}
                   >
-                    <Select
+                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesProductosEgreso}
                     />
@@ -336,9 +364,16 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="cantidad"
                     label="Cantidad"
-                    rules={[{ required: true }]}
+                    rules={[
+                      { required: true, message: 'La cantidad es obligatoria' },
+                      {
+                        type: 'integer',
+                        min: 1,
+                        message: 'La cantidad debe ser un entero positivo',
+                      },
+                    ]}
                   >
-                    <InputNumber min={1} />
+                    <InputNumber />
                   </Form.Item>
                   <Form.Item>
                     <Button type="primary" danger htmlType="submit">
@@ -360,9 +395,14 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="depositoOrigenId"
                     label="Depósito Origen"
-                    rules={[{ required: true }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Seleccione un depósito de origen',
+                      },
+                    ]}
                   >
-                    <Select
+                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesDepositos}
                       onChange={() =>
@@ -373,9 +413,14 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="depositoDestinoId"
                     label="Depósito Destino"
-                    rules={[{ required: true }]}
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Seleccione un depósito de destino',
+                      },
+                    ]}
                   >
-                    <Select
+                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesDepositos}
                     />
@@ -383,9 +428,11 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="productoId"
                     label="Producto"
-                    rules={[{ required: true }]}
+                    rules={[
+                      { required: true, message: 'Seleccione un producto' },
+                    ]}
                   >
-                    <Select
+                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesProductosTransferencia}
                     />
@@ -393,9 +440,16 @@ function StockProductoDepositoPage() {
                   <Form.Item
                     name="cantidad"
                     label="Cantidad"
-                    rules={[{ required: true }]}
+                    rules={[
+                      { required: true, message: 'La cantidad es obligatoria' },
+                      {
+                        type: 'integer',
+                        min: 1,
+                        message: 'La cantidad debe ser un entero positivo',
+                      },
+                    ]}
                   >
-                    <InputNumber min={1} />
+                    <InputNumber />
                   </Form.Item>
                   <Form.Item>
                     <Button type="primary" htmlType="submit">
@@ -417,17 +471,28 @@ function StockProductoDepositoPage() {
             label="Depósito"
             rules={[{ required: true }]}
           >
-            <Select style={{ width: 180 }} options={opcionesDepositos} />
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 180 }} options={opcionesDepositos} />
           </Form.Item>
           <Form.Item
             name="productoId"
             label="Producto"
             rules={[{ required: true }]}
           >
-            <Select style={{ width: 180 }} options={opcionesProductos} />
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 180 }} options={opcionesProductos} />
           </Form.Item>
-          <Form.Item name="stock" label="Stock" rules={[{ required: true }]}>
-            <InputNumber min={0} />
+          <Form.Item
+            name="stock"
+            label="Stock"
+            rules={[
+              { required: true, message: 'El stock es obligatorio' },
+              {
+                type: 'integer',
+                min: 1,
+                message: 'El stock debe ser positivo',
+              },
+            ]}
+          >
+            <InputNumber />
           </Form.Item>
           <Form.Item>
             <Button

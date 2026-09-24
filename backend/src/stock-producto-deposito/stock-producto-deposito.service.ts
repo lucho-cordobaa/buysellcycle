@@ -10,6 +10,14 @@ import { Prisma } from '../../generated/prisma/client';
 export class StockProductoDepositoService {
   constructor(private prisma: PrismaService) {}
 
+  private validarCantidadPositiva(cantidad: number) {
+    if (!Number.isInteger(cantidad) || cantidad <= 0) {
+      throw new BadRequestException(
+        'La cantidad debe ser un número entero positivo',
+      );
+    }
+  }
+
   async create(createStockProductoDepositoDto: CreateStockProductoDepositoDto) {
     return this.prisma.$transaction(async (tx) => {
       try {
@@ -100,6 +108,7 @@ export class StockProductoDepositoService {
 
   async ingresarStock(ingresoDto: IngresoStockDto) {
     const { depositoId, productoId, cantidad } = ingresoDto;
+    this.validarCantidadPositiva(cantidad);
 
     return this.prisma.$transaction(async (tx) => {
       const stockActualizado = await tx.stockProductoDeposito.upsert({
@@ -116,6 +125,7 @@ export class StockProductoDepositoService {
 
   async egresarStock(egresoDto: IngresoStockDto) {
     const { depositoId, productoId, cantidad } = egresoDto;
+    this.validarCantidadPositiva(cantidad);
 
     return this.prisma.$transaction(async (tx) => {
       const resultado = await tx.stockProductoDeposito.updateMany({
@@ -145,6 +155,7 @@ export class StockProductoDepositoService {
 
   async transferirStock(dto: TransferenciaStockDto) {
     const { depositoOrigenId, depositoDestinoId, productoId, cantidad } = dto;
+    this.validarCantidadPositiva(cantidad);
 
     if (depositoOrigenId === depositoDestinoId) {
       throw new BadRequestException(

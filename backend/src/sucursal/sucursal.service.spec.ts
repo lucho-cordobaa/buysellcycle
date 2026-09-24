@@ -6,7 +6,7 @@ describe('SucursalService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SucursalService],
+      providers: [{ provide: SucursalService, useFactory: () => new SucursalService({} as never) }],
     }).compile();
 
     service = module.get<SucursalService>(SucursalService);

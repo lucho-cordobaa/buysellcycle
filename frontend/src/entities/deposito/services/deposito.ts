@@ -9,7 +9,7 @@ export async function getDepositos(): Promise<Deposito[]> {
 export async function createDeposito(
   data: Omit<
     Deposito,
-    'id' | 'archivado' | 'fechaCreacion' | 'fechaActualizacion'
+    'id' | 'codigo' | 'archivado' | 'fechaCreacion' | 'fechaActualizacion'
   >,
 ): Promise<Deposito> {
   const response = await api.post('/deposito', data);
@@ -24,7 +24,10 @@ export async function getDepositoById(id: number): Promise<Deposito> {
 export async function updateDeposito(
   id: number,
   data: Partial<
-    Omit<Deposito, 'id' | 'archivado' | 'fechaCreacion' | 'fechaActualizacion'>
+    Omit<
+      Deposito,
+      'id' | 'codigo' | 'archivado' | 'fechaCreacion' | 'fechaActualizacion'
+    >
   >,
 ): Promise<Deposito> {
   const response = await api.patch(`/deposito/${id}`, data);

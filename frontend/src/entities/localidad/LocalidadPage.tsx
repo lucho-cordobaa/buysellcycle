@@ -1,3 +1,4 @@
+import { filterSelectOption } from '../../utils/filterSelectOption';
 import { useEffect, useState } from 'react';
 import {
   getLocalidades,
@@ -67,10 +68,12 @@ function LocalidadesPage() {
 
   const [form] = Form.useForm();
 
-  const opcionesProvincias = provincias.map((localidad) => ({
-    value: localidad.id,
-    label: localidad.nombre,
-  }));
+  const opcionesProvincias = provincias
+    .filter((provincia) => !provincia.archivado)
+    .map((provincia) => ({
+      value: provincia.id,
+      label: provincia.nombre,
+    }));
 
   const onFinish = async (values: { nombre: string; provinciaId: number }) => {
     try {
@@ -154,7 +157,7 @@ function LocalidadesPage() {
             label="Provincia"
             rules={[{ required: true, message: 'Seleccione una provincia' }]}
           >
-            <Select style={{ width: 200 }} options={opcionesProvincias} />
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 200 }} options={opcionesProvincias} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">

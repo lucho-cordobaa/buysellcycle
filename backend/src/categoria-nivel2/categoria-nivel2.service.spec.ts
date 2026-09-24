@@ -6,7 +6,7 @@ describe('CategoriaNivel2Service', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CategoriaNivel2Service],
+      providers: [{ provide: CategoriaNivel2Service, useFactory: () => new CategoriaNivel2Service({} as never) }],
     }).compile();
 
     service = module.get<CategoriaNivel2Service>(CategoriaNivel2Service);

@@ -3,12 +3,18 @@ import { CreateDepositoDto } from './dto/create-deposito.dto';
 import { UpdateDepositoDto } from './dto/update-deposito.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '../../generated/prisma/client';
+import { validarLocalidadDeProvincia } from '../common/validar-localidad-provincia';
 
 @Injectable()
 export class DepositoService {
   constructor(private prisma: PrismaService) {}
 
   async create(createDepositoDto: CreateDepositoDto) {
+    await validarLocalidadDeProvincia(
+      this.prisma,
+      createDepositoDto.provinciaId,
+      createDepositoDto.localidadId,
+    );
     try {
       const total = await this.prisma.deposito.count();
       const codigo = `DEP-${String(total + 1).padStart(2, '0')}`;
@@ -37,9 +43,25 @@ export class DepositoService {
     return this.prisma.deposito.findUnique({ where: { id } });
   }
 
-  update(id: number, updateDepositoDto: UpdateDepositoDto) {
+  async update(id: number, updateDepositoDto: UpdateDepositoDto) {
+    if (
+      updateDepositoDto.provinciaId !== undefined ||
+      updateDepositoDto.localidadId !== undefined
+    ) {
+      const actual = await this.prisma.deposito.findUnique({
+        where: { id },
+        select: { provinciaId: true, localidadId: true },
+      });
+      if (actual) {
+        await validarLocalidadDeProvincia(
+          this.prisma,
+          updateDepositoDto.provinciaId ?? actual.provinciaId,
+          updateDepositoDto.localidadId ?? actual.localidadId,
+        );
+      }
+    }
     try {
-      return this.prisma.deposito.update({
+      return await this.prisma.deposito.update({
         where: { id },
         data: updateDepositoDto,
       });

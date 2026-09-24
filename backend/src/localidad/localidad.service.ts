@@ -8,9 +8,9 @@ import { Prisma } from '../../generated/prisma/client';
 export class LocalidadService {
   constructor(private prisma: PrismaService) {}
 
-  create(createLocalidadDto: CreateLocalidadDto) {
+  async create(createLocalidadDto: CreateLocalidadDto) {
     try {
-      return this.prisma.localidad.create({ data: createLocalidadDto });
+      return await this.prisma.localidad.create({ data: createLocalidadDto });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -30,9 +30,9 @@ export class LocalidadService {
     return this.prisma.localidad.findUnique({ where: { id } });
   }
 
-  update(id: number, updateLocalidadDto: UpdateLocalidadDto) {
+  async update(id: number, updateLocalidadDto: UpdateLocalidadDto) {
     try {
-      return this.prisma.localidad.update({
+      return await this.prisma.localidad.update({
         where: { id },
         data: updateLocalidadDto,
       });

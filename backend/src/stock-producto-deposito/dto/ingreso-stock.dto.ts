@@ -9,8 +9,8 @@ export class IngresoStockDto {
   @IsNotEmpty()
   @IsPositive()
   productoId!: number;
-  @IsInt()
-  @IsNotEmpty()
-  @IsPositive()
+  @IsInt({ message: 'La cantidad debe ser un número entero' })
+  @IsNotEmpty({ message: 'La cantidad es obligatoria' })
+  @IsPositive({ message: 'La cantidad debe ser positiva' })
   cantidad!: number;
 }

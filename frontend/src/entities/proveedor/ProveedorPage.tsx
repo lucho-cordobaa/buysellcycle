@@ -176,6 +176,7 @@ function ProveedorPage() {
 
         <Table
           dataSource={proveedoresFiltrados}
+          rowKey="id"
           scroll={{ x: 800 }}
           columns={[
             {

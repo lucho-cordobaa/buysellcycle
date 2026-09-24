@@ -8,9 +8,9 @@ import { Prisma } from '../../generated/prisma/client';
 export class ProvinciaService {
   constructor(private prisma: PrismaService) {}
 
-  create(createProvinciaDto: CreateProvinciaDto) {
+  async create(createProvinciaDto: CreateProvinciaDto) {
     try {
-      return this.prisma.provincia.create({ data: createProvinciaDto });
+      return await this.prisma.provincia.create({ data: createProvinciaDto });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -30,9 +30,9 @@ export class ProvinciaService {
     return this.prisma.provincia.findUnique({ where: { id } });
   }
 
-  update(id: number, updateProvinciaDto: UpdateProvinciaDto) {
+  async update(id: number, updateProvinciaDto: UpdateProvinciaDto) {
     try {
-      return this.prisma.provincia.update({
+      return await this.prisma.provincia.update({
         where: { id },
         data: updateProvinciaDto,
       });

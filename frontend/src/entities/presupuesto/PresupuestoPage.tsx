@@ -1,3 +1,4 @@
+import { filterSelectOption } from '../../utils/filterSelectOption';
 import { useState, useEffect } from 'react';
 import {
   getPresupuestos,
@@ -196,14 +197,14 @@ function PresupuestoPage() {
               label="Cliente"
               rules={[{ required: true, message: 'Seleccione un cliente' }]}
             >
-              <Select style={{ width: 220 }} options={opcionesClientes} />
+              <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 220 }} options={opcionesClientes} />
             </Form.Item>
             <Form.Item
               name="usuarioId"
               label="Usuario"
               rules={[{ required: true, message: 'Seleccione un usuario' }]}
             >
-              <Select style={{ width: 220 }} options={opcionesUsuarios} />
+              <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 220 }} options={opcionesUsuarios} />
             </Form.Item>
           </Space>
 
@@ -230,7 +231,7 @@ function PresupuestoPage() {
                       name={[field.name, 'productoId']}
                       rules={[{ required: true, message: 'Elija un producto' }]}
                     >
-                      <Select
+                      <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
                         style={{ width: 200 }}
                         placeholder="Producto"
                         options={opcionesProductos}

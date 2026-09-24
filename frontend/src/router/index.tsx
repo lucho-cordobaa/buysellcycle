@@ -3,8 +3,6 @@ import MarcasPage from '../entities/marca';
 import CategoriaNivel2Page from '../entities/categoria-nivel2';
 import CategoriaNivel1Page from '../entities/categoria-nivel1';
 import ProveedorPage from '../entities/proveedor';
-import ProvinciasPage from '../entities/provincia';
-import LocalidadesPage from '../entities/localidad';
 import SucursalPage from '../entities/sucursal';
 import ClientePage from '../entities/cliente';
 import DepositoPage from '../entities/deposito';
@@ -24,8 +22,8 @@ function AppRouter() {
           <Route path="categorias-nivel2" element={<CategoriaNivel2Page />} />
           <Route path="categorias-nivel1" element={<CategoriaNivel1Page />} />
           <Route path="proveedores" element={<ProveedorPage />} />
-          <Route path="provincias" element={<ProvinciasPage />} />
-          <Route path="localidades" element={<LocalidadesPage />} />
+          <Route path="provincias" element={<Navigate to="/clientes" replace />} />
+          <Route path="localidades" element={<Navigate to="/clientes" replace />} />
           <Route path="sucursales" element={<SucursalPage />} />
           <Route path="clientes" element={<ClientePage />} />
           <Route path="depositos" element={<DepositoPage />} />

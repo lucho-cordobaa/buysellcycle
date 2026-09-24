@@ -5,8 +5,6 @@ import {
   AppstoreOutlined,
   BarsOutlined,
   ShopOutlined,
-  EnvironmentOutlined,
-  PushpinOutlined,
   BankOutlined,
   UserOutlined,
   InboxOutlined,
@@ -46,23 +44,6 @@ const items = [
         key: '/productos',
         icon: <ShoppingOutlined />,
         label: <Link to="/productos">Productos</Link>,
-      },
-    ],
-  },
-  {
-    key: 'geografia',
-    label: 'Geografía',
-    type: 'group' as const,
-    children: [
-      {
-        key: '/provincias',
-        icon: <EnvironmentOutlined />,
-        label: <Link to="/provincias">Provincias</Link>,
-      },
-      {
-        key: '/localidades',
-        icon: <PushpinOutlined />,
-        label: <Link to="/localidades">Localidades</Link>,
       },
     ],
   },

@@ -1,3 +1,4 @@
+import { filterSelectOption } from '../../utils/filterSelectOption';
 import { useEffect, useState } from 'react';
 import {
   getDepositos,
@@ -83,19 +84,24 @@ function DepositoPage() {
 
   const [form] = Form.useForm();
 
-  const opcionesProvincias = provincias.map((sucursal) => ({
-    value: sucursal.id,
-    label: sucursal.nombre,
-  }));
+  const opcionesProvincias = provincias
+    .filter((provincia) => !provincia.archivado)
+    .map((provincia) => ({
+      value: provincia.id,
+      label: provincia.nombre,
+    }));
 
   const provinciaSeleccionada = Form.useWatch('provinciaId', form);
 
   const opcionesLocalidades = localidades
-    .filter((localidad) => localidad.provinciaId === provinciaSeleccionada)
+    .filter(
+      (localidad) =>
+        !localidad.archivado &&
+        localidad.provinciaId === provinciaSeleccionada,
+    )
     .map((localidad) => ({ value: localidad.id, label: localidad.nombre }));
 
   const onFinish = async (values: {
-    codigo: string;
     nombre: string;
     provinciaId: number;
     localidadId: number;
@@ -123,7 +129,6 @@ function DepositoPage() {
   const handleEdit = (deposito: Deposito) => {
     setEditandoId(deposito.id);
     form.setFieldsValue({
-      codigo: deposito.codigo,
       nombre: deposito.nombre,
       provinciaId: deposito.provinciaId,
       localidadId: deposito.localidadId,
@@ -172,13 +177,6 @@ function DepositoPage() {
           layout={screens.xs ? 'vertical' : 'inline'}
         >
           <Form.Item
-            name="codigo"
-            label="Codigo"
-            rules={[{ required: true, message: 'Ingrese el codigo' }]}
-          >
-            <Input placeholder="Ej: DEP-01" />
-          </Form.Item>
-          <Form.Item
             name="nombre"
             label="Nombre"
             rules={[{ required: true, message: 'Ingrese el nombre' }]}
@@ -190,7 +188,7 @@ function DepositoPage() {
             label="Provincia"
             rules={[{ required: true, message: 'Seleccione una provincia' }]}
           >
-            <Select
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
               style={{ width: 200 }}
               options={opcionesProvincias}
               onChange={() => {
@@ -203,7 +201,7 @@ function DepositoPage() {
             label="Localidad"
             rules={[{ required: true, message: 'Seleccione una localidad' }]}
           >
-            <Select
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
               style={{ width: 200 }}
               options={opcionesLocalidades}
               disabled={!provinciaSeleccionada}

@@ -1,3 +1,4 @@
+import { filterSelectOption } from '../../utils/filterSelectOption';
 import { useEffect, useState } from 'react';
 import {
   getUsuarios,
@@ -199,7 +200,7 @@ function UsuarioPage() {
             label="Rol"
             rules={[{ required: true, message: 'Seleccione un rol' }]}
           >
-            <Select style={{ width: 200 }} options={opcionesRoles} />
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 200 }} options={opcionesRoles} />
           </Form.Item>
           <Form.Item
             name="nombreUsuario"
@@ -215,7 +216,7 @@ function UsuarioPage() {
             label="Sucursal"
             rules={[{ required: true, message: 'Seleccione una sucursal' }]}
           >
-            <Select style={{ width: 200 }} options={opcionesSucursales} />
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 200 }} options={opcionesSucursales} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">

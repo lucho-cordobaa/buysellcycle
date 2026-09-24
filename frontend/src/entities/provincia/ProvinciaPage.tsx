@@ -150,6 +150,7 @@ function ProvinciasPage() {
 
         <Table
           dataSource={provinciasFiltradas}
+          rowKey="id"
           scroll={{ x: 700 }}
           columns={[
             {

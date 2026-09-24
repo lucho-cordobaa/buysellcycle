@@ -11,6 +11,6 @@ export class CreateStockProductoDepositoDto {
   productoId!: number;
   @IsInt()
   @IsNotEmpty()
-  @IsPositive()
+  @IsPositive({ message: 'El stock debe ser positivo' })
   stock!: number;
 }

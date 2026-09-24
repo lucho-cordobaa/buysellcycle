@@ -1,3 +1,4 @@
+import { filterSelectOption } from '../../utils/filterSelectOption';
 import { useEffect, useState } from 'react';
 import {
   getProductos,
@@ -215,20 +216,14 @@ function ProductoPage() {
             label="Marca"
             rules={[{ required: true, message: 'Seleccione una marca' }]}
           >
-            <Select
-              style={{ width: 200 }}
-              options={opcionesMarcas}
-              onChange={() => {
-                form.setFieldValue('localidadId', undefined);
-              }}
-            />
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 200 }} options={opcionesMarcas} />
           </Form.Item>
           <Form.Item
             name="categoriaNivel2Id"
             label="Categoria"
             rules={[{ required: true, message: 'Seleccione una categoria' }]}
           >
-            <Select style={{ width: 200 }} options={opcionesCategorias} />
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 200 }} options={opcionesCategorias} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">

@@ -53,6 +53,14 @@ async function seedLocalidades() {
     mapaProvincias.set(provincia.nombre, provincia.id);
   }
 
+  const tierraDelFuegoId = mapaProvincias.get('Tierra del Fuego');
+  if (tierraDelFuegoId) {
+    mapaProvincias.set(
+      'Tierra del Fuego, Antártida e Islas del Atlántico Sur',
+      tierraDelFuegoId,
+    );
+  }
+
   const data: { nombre: string; provinciaId: number }[] = [];
   for (const loc of localidadesJson) {
     const provinciaId = mapaProvincias.get(loc.provincia.nombre);

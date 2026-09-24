@@ -8,9 +8,9 @@ import { Prisma } from '../../generated/prisma/client';
 export class ProveedorService {
   constructor(private prisma: PrismaService) {}
 
-  create(createProveedorDto: CreateProveedorDto) {
+  async create(createProveedorDto: CreateProveedorDto) {
     try {
-      return this.prisma.proveedor.create({ data: createProveedorDto });
+      return await this.prisma.proveedor.create({ data: createProveedorDto });
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -30,9 +30,9 @@ export class ProveedorService {
     return this.prisma.proveedor.findUnique({ where: { id } });
   }
 
-  update(id: number, updateProveedorDto: UpdateProveedorDto) {
+  async update(id: number, updateProveedorDto: UpdateProveedorDto) {
     try {
-      return this.prisma.proveedor.update({
+      return await this.prisma.proveedor.update({
         where: { id },
         data: updateProveedorDto,
       });

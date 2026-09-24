@@ -3,12 +3,18 @@ import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '../../generated/prisma/client';
+import { validarLocalidadDeProvincia } from '../common/validar-localidad-provincia';
 
 @Injectable()
 export class ClienteService {
   constructor(private prisma: PrismaService) {}
 
   async create(createClienteDto: CreateClienteDto) {
+    await validarLocalidadDeProvincia(
+      this.prisma,
+      createClienteDto.provinciaId,
+      createClienteDto.localidadId,
+    );
     try {
       return await this.prisma.cliente.create({ data: createClienteDto });
     } catch (error) {
@@ -37,9 +43,25 @@ export class ClienteService {
     return this.prisma.cliente.findUnique({ where: { id } });
   }
 
-  update(id: number, updateClienteDto: UpdateClienteDto) {
+  async update(id: number, updateClienteDto: UpdateClienteDto) {
+    if (
+      updateClienteDto.provinciaId !== undefined ||
+      updateClienteDto.localidadId !== undefined
+    ) {
+      const actual = await this.prisma.cliente.findUnique({
+        where: { id },
+        select: { provinciaId: true, localidadId: true },
+      });
+      if (actual) {
+        await validarLocalidadDeProvincia(
+          this.prisma,
+          updateClienteDto.provinciaId ?? actual.provinciaId,
+          updateClienteDto.localidadId ?? actual.localidadId,
+        );
+      }
+    }
     try {
-      return this.prisma.cliente.update({
+      return await this.prisma.cliente.update({
         where: { id },
         data: updateClienteDto,
       });

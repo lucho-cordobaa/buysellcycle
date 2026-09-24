@@ -1,3 +1,4 @@
+import { filterSelectOption } from '../../utils/filterSelectOption';
 import { useEffect, useState } from 'react';
 import {
   getClientes,
@@ -86,7 +87,11 @@ function ClientePage() {
   const provinciaSeleccionada = Form.useWatch('provinciaId', form);
 
   const opcionesLocalidades = localidades
-    .filter((localidad) => localidad.provinciaId === provinciaSeleccionada)
+    .filter(
+      (localidad) =>
+        !localidad.archivado &&
+        localidad.provinciaId === provinciaSeleccionada,
+    )
     .map((localidad) => ({ value: localidad.id, label: localidad.nombre }));
 
   const onFinish = async (values: {
@@ -209,7 +214,7 @@ function ClientePage() {
             label="Provincia"
             rules={[{ required: true, message: 'Seleccione una provincia' }]}
           >
-            <Select
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
               style={{ width: 200 }}
               options={opcionesProvincias}
               onChange={() => {
@@ -222,7 +227,7 @@ function ClientePage() {
             label="Localidad"
             rules={[{ required: true, message: 'Seleccione una localidad' }]}
           >
-            <Select
+            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
               style={{ width: 200 }}
               options={opcionesLocalidades}
               disabled={!provinciaSeleccionada}
