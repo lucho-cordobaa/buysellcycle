@@ -1,75 +1,46 @@
-# React + TypeScript + Vite
+# BuySellCycle — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web de BuySellCycle, construida con React, TypeScript, Vite y Ant Design. Permite administrar el catálogo, los clientes y proveedores, las sucursales, los depósitos, el stock y los presupuestos mediante la API del backend.
 
-Currently, two official plugins are available:
+## Instalación y ejecución
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Desde esta carpeta (`frontend`), instalá las dependencias y levantá el servidor de desarrollo:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Vite muestra en la terminal la dirección local; por defecto es `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+El cliente HTTP está configurado en `src/app/api/axios.ts` y apunta a `http://localhost:3000`. Si el backend corre en otra dirección, actualizá allí `baseURL` para que coincida. El backend también debe permitir el origen del frontend mediante CORS.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Funcionalidades
 
+- **Catálogo:** marcas, categorías y productos.
+- **Comercial:** clientes, proveedores y presupuestos.
+- **Operaciones:** sucursales, depósitos, usuarios y stock por depósito.
+
+La página inicial redirige a `/marcas`. Las rutas principales son `/marcas`, `/categorias-nivel1`, `/categorias-nivel2`, `/productos`, `/clientes`, `/proveedores`, `/presupuestos`, `/sucursales`, `/depositos`, `/usuarios` y `/stock`.
+
+## Comandos disponibles
+
+```bash
+npm run dev      # Servidor de desarrollo con Vite
+npm run build    # Verificar TypeScript y generar la compilación en dist/
+npm run preview  # Previsualizar la compilación localmente
+npm run lint     # Revisar el código con ESLint
+```
+
+## Estructura
+
+```text
+frontend/
+├── public/           # Recursos estáticos
+└── src/
+    ├── app/api/      # Cliente HTTP de Axios
+    ├── components/   # Componentes compartidos y layout
+    ├── entities/     # Páginas, servicios y tipos por recurso
+    ├── router/       # Rutas de la aplicación
+    └── store/        # Estado compartido
 ```
