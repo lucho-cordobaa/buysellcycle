@@ -18,22 +18,24 @@ import {
   Tag,
   Popconfirm,
   Switch,
+  Modal,
   message,
-  Grid,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  UndoOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
-
-const { useBreakpoint } = Grid;
 
 function MarcasPage() {
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
-
-  const screens = useBreakpoint();
+  const [modalAbierto, setModalAbierto] = useState(false);
 
   const fetchMarcas = async () => {
     try {
@@ -50,6 +52,24 @@ function MarcasPage() {
 
   const [form] = Form.useForm();
 
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setEditandoId(null);
+    form.resetFields();
+  };
+
+  const handleNueva = () => {
+    setEditandoId(null);
+    form.resetFields();
+    setModalAbierto(true);
+  };
+
+  const handleEdit = (marca: Marca) => {
+    setEditandoId(marca.id);
+    form.setFieldsValue({ nombre: marca.nombre });
+    setModalAbierto(true);
+  };
+
   const onFinish = async (values: { nombre: string }) => {
     try {
       if (editandoId !== null) {
@@ -59,8 +79,7 @@ function MarcasPage() {
         await createMarca(values.nombre);
         message.success('Marca creada correctamente');
       }
-      setEditandoId(null);
-      form.resetFields();
+      cerrarModal();
       fetchMarcas();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -99,11 +118,6 @@ function MarcasPage() {
     }
   };
 
-  const handleEdit = (marca: Marca) => {
-    setEditandoId(marca.id);
-    form.setFieldsValue({ nombre: marca.nombre });
-  };
-
   const marcasFiltradas = marcas.filter(
     (marca) => mostrarArchivados || !marca.archivado,
   );
@@ -112,48 +126,25 @@ function MarcasPage() {
     <div>
       <Title level={2}>Marcas</Title>
 
-      <Card style={{ marginBottom: 24 }}>
-        <Form
-          form={form}
-          onFinish={onFinish}
-          layout={screens.xs ? 'vertical' : 'inline'}
-        >
-          <Form.Item
-            name="nombre"
-            label="Nombre"
-            rules={[
-              {
-                required: true,
-                message: 'Por favor, ingrese el nombre',
-              },
-            ]}
-          >
-            <Input placeholder="Ej: Adidas" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              {editandoId !== null ? 'Guardar cambios' : 'Crear Marca'}
-            </Button>
-          </Form.Item>
-          {editandoId !== null && (
-            <Form.Item>
-              <Button
-                onClick={() => {
-                  setEditandoId(null);
-                  form.resetFields();
-                }}
-              >
-                Cancelar
-              </Button>
-            </Form.Item>
-          )}
-        </Form>
-      </Card>
-
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch
+              checked={mostrarArchivados}
+              onChange={setMostrarArchivados}
+            />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleNueva}>
+            Nueva marca
+          </Button>
         </Space>
 
         <Table
@@ -217,6 +208,34 @@ function MarcasPage() {
           ]}
         />
       </Card>
+
+      <Modal
+        title={editandoId !== null ? 'Editar marca' : 'Nueva marca'}
+        open={modalAbierto}
+        onCancel={cerrarModal}
+        footer={null}
+        forceRender
+      >
+        <Form form={form} onFinish={onFinish} layout="vertical">
+          <Form.Item
+            name="nombre"
+            label="Nombre"
+            rules={[
+              { required: true, message: 'Por favor, ingrese el nombre' },
+            ]}
+          >
+            <Input placeholder="Ej: Adidas" />
+          </Form.Item>
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={cerrarModal}>Cancelar</Button>
+              <Button type="primary" htmlType="submit">
+                {editandoId !== null ? 'Guardar cambios' : 'Crear marca'}
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 }

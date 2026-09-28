@@ -23,14 +23,12 @@ import {
   Switch,
   message,
   Popconfirm,
-  Grid,
+  Modal,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, UndoOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
-
-const { useBreakpoint } = Grid;
 
 function CategoriaNivel2Page() {
   const [categorias, setCategorias] = useState<CategoriaNivel2[]>([]);
@@ -38,9 +36,9 @@ function CategoriaNivel2Page() {
     [],
   );
   const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
 
-  const screens = useBreakpoint();
 
   const fetchCategorias = async () => {
     try {
@@ -70,6 +68,18 @@ function CategoriaNivel2Page() {
 
   const [form] = Form.useForm();
 
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setEditandoId(null);
+    form.resetFields();
+  };
+
+  const handleNueva = () => {
+    setEditandoId(null);
+    form.resetFields();
+    setModalAbierto(true);
+  };
+
   const opcionesCategoriaNivel1 = categoriasNivel1
     .filter((categoria) => !categoria.archivado)
     .map((categoria) => ({
@@ -89,8 +99,7 @@ function CategoriaNivel2Page() {
         await createCategoriaNivel2(values);
         message.success('Categoria creada correctamente');
       }
-      setEditandoId(null);
-      form.resetFields();
+      cerrarModal();
       fetchCategorias();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -107,6 +116,7 @@ function CategoriaNivel2Page() {
       nombre: categoria.nombre,
       categoriaNivel1Id: categoria.categoriaNivel1Id,
     });
+    setModalAbierto(true);
   };
 
   const handleReactivar = async (categoria: CategoriaNivel2) => {
@@ -145,11 +155,17 @@ function CategoriaNivel2Page() {
     <div>
       <Title level={2}>Categorías Nivel 2</Title>
 
-      <Card style={{ marginBottom: 24 }}>
+      <Modal
+        title={editandoId !== null ? 'Editar categoría' : 'Nueva categoría'}
+        open={modalAbierto}
+        onCancel={cerrarModal}
+        footer={null}
+        forceRender
+      >
         <Form
           form={form}
           onFinish={onFinish}
-          layout={screens.xs ? 'vertical' : 'inline'}
+          layout="vertical"
         >
           <Form.Item
             name="nombre"
@@ -165,30 +181,34 @@ function CategoriaNivel2Page() {
           >
             <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 200 }} options={opcionesCategoriaNivel1} />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={cerrarModal}>Cancelar</Button>
+              <Button type="primary" htmlType="submit">
+
               {editandoId !== null ? 'Guardar cambios' : 'Crear Categoría'}
-            </Button>
-          </Form.Item>
-          {editandoId !== null && (
-            <Form.Item>
-              <Button
-                onClick={() => {
-                  setEditandoId(null);
-                  form.resetFields();
-                }}
-              >
-                Cancelar
               </Button>
-            </Form.Item>
-          )}
+            </Space>
+          </Form.Item>
         </Form>
-      </Card>
+      </Modal>
 
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleNueva}>
+            Nueva categoría
+          </Button>
         </Space>
 
         <Table

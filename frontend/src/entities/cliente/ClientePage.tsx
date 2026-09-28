@@ -23,15 +23,13 @@ import {
   Switch,
   message,
   Popconfirm,
-  Grid,
+  Modal,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, UndoOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useProvinciaStore } from '../../store/provinciaStore';
 
 const { Title } = Typography;
-
-const { useBreakpoint } = Grid;
 
 function ClientePage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -39,9 +37,9 @@ function ClientePage() {
   const cargarProvincias = useProvinciaStore((state) => state.cargarProvincias);
   const [localidades, setLocalidades] = useState<Localidad[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
 
-  const screens = useBreakpoint();
 
   const fetchClientes = async () => {
     try {
@@ -77,6 +75,18 @@ function ClientePage() {
 
   const [form] = Form.useForm();
 
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setEditandoId(null);
+    form.resetFields();
+  };
+
+  const handleNueva = () => {
+    setEditandoId(null);
+    form.resetFields();
+    setModalAbierto(true);
+  };
+
   const opcionesProvincias = provincias
     .filter((sucursal) => !sucursal.archivado)
     .map((sucursal) => ({
@@ -110,8 +120,7 @@ function ClientePage() {
         await createCliente(values);
         message.success('Cliente creado correctamente');
       }
-      setEditandoId(null);
-      form.resetFields();
+      cerrarModal();
       fetchClientes();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -132,6 +141,7 @@ function ClientePage() {
       provinciaId: cliente.provinciaId,
       localidadId: cliente.localidadId,
     });
+    setModalAbierto(true);
   };
 
   const handleReactivar = async (cliente: Cliente) => {
@@ -169,11 +179,17 @@ function ClientePage() {
   return (
     <div>
       <Title level={2}>Clientes</Title>
-      <Card style={{ marginBottom: 24 }}>
+      <Modal
+        title={editandoId !== null ? 'Editar cliente' : 'Nuevo cliente'}
+        open={modalAbierto}
+        onCancel={cerrarModal}
+        footer={null}
+        forceRender
+      >
         <Form
           form={form}
           onFinish={onFinish}
-          layout={screens.xs ? 'vertical' : 'inline'}
+          layout="vertical"
         >
           <Form.Item
             name="nombre"
@@ -233,30 +249,34 @@ function ClientePage() {
               disabled={!provinciaSeleccionada}
             />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={cerrarModal}>Cancelar</Button>
+              <Button type="primary" htmlType="submit">
+
               {editandoId !== null ? 'Guardar cambios' : 'Crear Cliente'}
-            </Button>
-          </Form.Item>
-          {editandoId !== null && (
-            <Form.Item>
-              <Button
-                onClick={() => {
-                  setEditandoId(null);
-                  form.resetFields();
-                }}
-              >
-                Cancelar
               </Button>
-            </Form.Item>
-          )}
+            </Space>
+          </Form.Item>
         </Form>
-      </Card>
+      </Modal>
 
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleNueva}>
+            Nuevo cliente
+          </Button>
         </Space>
 
         <Table

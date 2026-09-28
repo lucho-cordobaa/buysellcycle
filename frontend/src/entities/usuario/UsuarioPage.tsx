@@ -23,23 +23,21 @@ import {
   Switch,
   message,
   Popconfirm,
-  Grid,
+  Modal,
 } from 'antd';
 import type { Rol } from './types/usuario';
-import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, UndoOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
-
-const { useBreakpoint } = Grid;
 
 function UsuarioPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
 
-  const screens = useBreakpoint();
 
   const fetchUsuarios = async () => {
     try {
@@ -68,6 +66,18 @@ function UsuarioPage() {
   }, []);
 
   const [form] = Form.useForm();
+
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setEditandoId(null);
+    form.resetFields();
+  };
+
+  const handleNueva = () => {
+    setEditandoId(null);
+    form.resetFields();
+    setModalAbierto(true);
+  };
 
   const opcionesSucursales = sucursales
     .filter((usuario) => !usuario.archivado)
@@ -103,8 +113,7 @@ function UsuarioPage() {
         await createUsuario(values);
         message.success('Usuario creado correctamente');
       }
-      setEditandoId(null);
-      form.resetFields();
+      cerrarModal();
       fetchUsuarios();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -125,6 +134,7 @@ function UsuarioPage() {
       nombreUsuario: usuario.nombreUsuario,
       sucursalId: usuario.sucursalId,
     });
+    setModalAbierto(true);
   };
 
   const handleReactivar = async (usuario: Usuario) => {
@@ -162,11 +172,17 @@ function UsuarioPage() {
   return (
     <div>
       <Title level={2}>Usuarios</Title>
-      <Card style={{ marginBottom: 24 }}>
+      <Modal
+        title={editandoId !== null ? 'Editar usuario' : 'Nuevo usuario'}
+        open={modalAbierto}
+        onCancel={cerrarModal}
+        footer={null}
+        forceRender
+      >
         <Form
           form={form}
           onFinish={onFinish}
-          layout={screens.xs ? 'vertical' : 'inline'}
+          layout="vertical"
         >
           <Form.Item
             name="nombre"
@@ -218,30 +234,34 @@ function UsuarioPage() {
           >
             <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 200 }} options={opcionesSucursales} />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={cerrarModal}>Cancelar</Button>
+              <Button type="primary" htmlType="submit">
+
               {editandoId !== null ? 'Guardar cambios' : 'Crear Usuario'}
-            </Button>
-          </Form.Item>
-          {editandoId !== null && (
-            <Form.Item>
-              <Button
-                onClick={() => {
-                  setEditandoId(null);
-                  form.resetFields();
-                }}
-              >
-                Cancelar
               </Button>
-            </Form.Item>
-          )}
+            </Space>
+          </Form.Item>
         </Form>
-      </Card>
+      </Modal>
 
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleNueva}>
+            Nuevo usuario
+          </Button>
         </Space>
 
         <Table

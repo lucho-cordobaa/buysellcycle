@@ -19,21 +19,23 @@ import {
   Switch,
   message,
   Popconfirm,
-  Grid,
+  Modal,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  UndoOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
-
-const { useBreakpoint } = Grid;
 
 function CategoriaNivel1Page() {
   const [categorias, setCategorias] = useState<CategoriaNivel1[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
-
-  const screens = useBreakpoint();
+  const [modalAbierto, setModalAbierto] = useState(false);
 
   const fetchCategorias = async () => {
     try {
@@ -50,6 +52,18 @@ function CategoriaNivel1Page() {
 
   const [form] = Form.useForm();
 
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setEditandoId(null);
+    form.resetFields();
+  };
+
+  const handleNueva = () => {
+    setEditandoId(null);
+    form.resetFields();
+    setModalAbierto(true);
+  };
+
   const onFinish = async (values: { nombre: string }) => {
     try {
       if (editandoId !== null) {
@@ -59,8 +73,7 @@ function CategoriaNivel1Page() {
         await createCategoriaNivel1(values.nombre);
         message.success('Categoria creada correctamente');
       }
-      setEditandoId(null);
-      form.resetFields();
+      cerrarModal();
       fetchCategorias();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -102,6 +115,7 @@ function CategoriaNivel1Page() {
   const handleEdit = (categoria: CategoriaNivel1) => {
     setEditandoId(categoria.id);
     form.setFieldsValue({ nombre: categoria.nombre });
+    setModalAbierto(true);
   };
 
   const categoriasFiltradas = categorias.filter(
@@ -112,12 +126,8 @@ function CategoriaNivel1Page() {
     <div>
       <Title level={2}>Categorías Nivel 1</Title>
 
-      <Card style={{ marginBottom: 24 }}>
-        <Form
-          form={form}
-          onFinish={onFinish}
-          layout={screens.xs ? 'vertical' : 'inline'}
-        >
+      <Modal title={editandoId !== null ? 'Editar categoría' : 'Nueva categoría'} open={modalAbierto} onCancel={cerrarModal} footer={null} forceRender>
+        <Form form={form} onFinish={onFinish} layout="vertical">
           <Form.Item
             name="nombre"
             label="Nombre"
@@ -130,30 +140,33 @@ function CategoriaNivel1Page() {
           >
             <Input placeholder="Ej: Indumentaria" />
           </Form.Item>
-          <Form.Item>
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={cerrarModal}>Cancelar</Button>
             <Button type="primary" htmlType="submit">
               {editandoId !== null ? 'Guardar cambios' : 'Crear Categoría'}
             </Button>
+            </Space>
           </Form.Item>
-          {editandoId !== null && (
-            <Form.Item>
-              <Button
-                onClick={() => {
-                  setEditandoId(null);
-                  form.resetFields();
-                }}
-              >
-                Cancelar
-              </Button>
-            </Form.Item>
-          )}
         </Form>
-      </Card>
+      </Modal>
 
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleNueva}>
+            Nueva categoría
+          </Button>
         </Space>
 
         <Table

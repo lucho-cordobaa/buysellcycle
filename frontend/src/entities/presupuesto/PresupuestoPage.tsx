@@ -27,14 +27,11 @@ import {
   message,
   Popconfirm,
   Modal,
-  Grid,
 } from 'antd';
 import { DeleteOutlined, UndoOutlined, EyeOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
-
-const { useBreakpoint } = Grid;
 
 const coloresEstado: Record<string, string> = {
   PENDIENTE: 'gold',
@@ -49,10 +46,9 @@ function PresupuestoPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
+  const [modalCreacionAbierto, setModalCreacionAbierto] = useState(false);
   const [presupuestoSeleccionado, setPresupuestoSeleccionado] =
     useState<Presupuesto | null>(null);
-
-  const screens = useBreakpoint();
 
   const fetchPresupuestos = async () => {
     try {
@@ -136,6 +132,7 @@ function PresupuestoPage() {
       await createPresupuesto(values);
       message.success('Presupuesto creado correctamente');
       form.resetFields();
+      setModalCreacionAbierto(false);
       fetchPresupuestos();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -185,13 +182,18 @@ function PresupuestoPage() {
   return (
     <div>
       <Title level={2}>Presupuestos</Title>
-      <Card style={{ marginBottom: 24 }}>
-        <Form
-          form={form}
-          onFinish={onFinish}
-          layout={screens.xs ? 'vertical' : 'inline'}
-        >
-          <Space>
+      <Modal
+        title="Nuevo presupuesto"
+        open={modalCreacionAbierto}
+        onCancel={() => {
+          setModalCreacionAbierto(false);
+          form.resetFields();
+        }}
+        footer={null}
+        forceRender
+      >
+        <Form form={form} onFinish={onFinish} layout="vertical">
+          <Space direction="vertical" style={{ width: '100%' }}>
             <Form.Item
               name="clienteId"
               label="Cliente"
@@ -259,18 +261,40 @@ function PresupuestoPage() {
             )}
           </Form.List>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Generar Presupuesto
-            </Button>
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button
+                onClick={() => {
+                  setModalCreacionAbierto(false);
+                  form.resetFields();
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button type="primary" htmlType="submit">
+                Generar presupuesto
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
-      </Card>
+      </Modal>
 
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button type="primary" onClick={() => setModalCreacionAbierto(true)}>
+            Nuevo presupuesto
+          </Button>
         </Space>
 
         <Table

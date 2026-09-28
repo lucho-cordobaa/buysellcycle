@@ -25,23 +25,21 @@ import {
   Switch,
   message,
   Popconfirm,
-  Grid,
+  Modal,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, UndoOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
-
-const { useBreakpoint } = Grid;
 
 function DepositoPage() {
   const [depositos, setDepositos] = useState<Deposito[]>([]);
   const [provincias, setProvincias] = useState<Provincia[]>([]);
   const [localidades, setLocalidades] = useState<Localidad[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
 
-  const screens = useBreakpoint();
 
   const fetchDepositos = async () => {
     try {
@@ -84,6 +82,18 @@ function DepositoPage() {
 
   const [form] = Form.useForm();
 
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setEditandoId(null);
+    form.resetFields();
+  };
+
+  const handleNueva = () => {
+    setEditandoId(null);
+    form.resetFields();
+    setModalAbierto(true);
+  };
+
   const opcionesProvincias = provincias
     .filter((provincia) => !provincia.archivado)
     .map((provincia) => ({
@@ -114,8 +124,7 @@ function DepositoPage() {
         await createDeposito(values);
         message.success('Deposito creado correctamente');
       }
-      setEditandoId(null);
-      form.resetFields();
+      cerrarModal();
       fetchDepositos();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -133,6 +142,7 @@ function DepositoPage() {
       provinciaId: deposito.provinciaId,
       localidadId: deposito.localidadId,
     });
+    setModalAbierto(true);
   };
 
   const handleReactivar = async (deposito: Deposito) => {
@@ -170,11 +180,17 @@ function DepositoPage() {
   return (
     <div>
       <Title level={2}>Depósitos</Title>
-      <Card style={{ marginBottom: 24 }}>
+      <Modal
+        title={editandoId !== null ? 'Editar depósito' : 'Nuevo depósito'}
+        open={modalAbierto}
+        onCancel={cerrarModal}
+        footer={null}
+        forceRender
+      >
         <Form
           form={form}
           onFinish={onFinish}
-          layout={screens.xs ? 'vertical' : 'inline'}
+          layout="vertical"
         >
           <Form.Item
             name="nombre"
@@ -207,30 +223,34 @@ function DepositoPage() {
               disabled={!provinciaSeleccionada}
             />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={cerrarModal}>Cancelar</Button>
+              <Button type="primary" htmlType="submit">
+
               {editandoId !== null ? 'Guardar cambios' : 'Crear Deposito'}
-            </Button>
-          </Form.Item>
-          {editandoId !== null && (
-            <Form.Item>
-              <Button
-                onClick={() => {
-                  setEditandoId(null);
-                  form.resetFields();
-                }}
-              >
-                Cancelar
               </Button>
-            </Form.Item>
-          )}
+            </Space>
+          </Form.Item>
         </Form>
-      </Card>
+      </Modal>
 
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleNueva}>
+            Nuevo depósito
+          </Button>
         </Space>
 
         <Table

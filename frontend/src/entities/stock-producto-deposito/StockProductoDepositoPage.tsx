@@ -28,23 +28,21 @@ import {
   Switch,
   message,
   Popconfirm,
-  Grid,
+  Modal,
 } from 'antd';
 import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
 
-const { useBreakpoint } = Grid;
-
 function StockProductoDepositoPage() {
   const [stocks, setStocks] = useState<StockProductoDeposito[]>([]);
   const [depositos, setDepositos] = useState<Deposito[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [modalOperacionesAbierto, setModalOperacionesAbierto] = useState(false);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
-
-  const screens = useBreakpoint();
 
   const fetchStocks = async () => {
     try {
@@ -201,6 +199,12 @@ function StockProductoDepositoPage() {
     }));
 
   const [form] = Form.useForm();
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setEditandoId(null);
+    form.resetFields();
+  };
+
   const handleEdit = (stock: StockProductoDeposito) => {
     setEditandoId(stock.id);
     form.setFieldsValue({
@@ -208,6 +212,7 @@ function StockProductoDepositoPage() {
       productoId: stock.productoId,
       stock: stock.stock,
     });
+    setModalAbierto(true);
   };
 
   const onFinishEdit = async (values: {
@@ -219,8 +224,7 @@ function StockProductoDepositoPage() {
     try {
       await updateStockProductoDeposito(editandoId, values);
       message.success('Registro guardado correctamente');
-      setEditandoId(null);
-      form.resetFields();
+      cerrarModal();
       fetchStocks();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -267,7 +271,13 @@ function StockProductoDepositoPage() {
     <div>
       <Title level={2}>Stock por Depósito</Title>
 
-      <Card style={{ marginBottom: 24 }}>
+      <Modal
+        title="Operaciones de stock"
+        open={modalOperacionesAbierto}
+        onCancel={() => setModalOperacionesAbierto(false)}
+        footer={null}
+        width={900}
+      >
         <Tabs
           items={[
             {
@@ -277,7 +287,7 @@ function StockProductoDepositoPage() {
                 <Form
                   form={formIngreso}
                   onFinish={onFinishIngreso}
-                  layout={screens.xs ? 'vertical' : 'inline'}
+                  layout="vertical"
                 >
                   <Form.Item
                     name="depositoId"
@@ -332,7 +342,7 @@ function StockProductoDepositoPage() {
                 <Form
                   form={formEgreso}
                   onFinish={onFinishEgreso}
-                  layout="inline"
+                  layout="vertical"
                 >
                   <Form.Item
                     name="depositoId"
@@ -390,7 +400,7 @@ function StockProductoDepositoPage() {
                 <Form
                   form={formTransferencia}
                   onFinish={onFinishTransferencia}
-                  layout="inline"
+                  layout="vertical"
                 >
                   <Form.Item
                     name="depositoOrigenId"
@@ -461,11 +471,10 @@ function StockProductoDepositoPage() {
             },
           ]}
         />
-      </Card>
+      </Modal>
 
-      <Card style={{ marginBottom: 24 }}>
-        <Title level={4}>Editar registro</Title>
-        <Form form={form} onFinish={onFinishEdit} layout="inline">
+      <Modal title="Editar registro" open={modalAbierto} onCancel={cerrarModal} footer={null} forceRender>
+        <Form form={form} onFinish={onFinishEdit} layout="vertical">
           <Form.Item
             name="depositoId"
             label="Depósito"
@@ -494,34 +503,36 @@ function StockProductoDepositoPage() {
           >
             <InputNumber />
           </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              disabled={editandoId === null}
-            >
-              Guardar cambios
-            </Button>
-          </Form.Item>
-          {editandoId !== null && (
-            <Form.Item>
-              <Button
-                onClick={() => {
-                  setEditandoId(null);
-                  form.resetFields();
-                }}
-              >
-                Cancelar
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={cerrarModal}>Cancelar</Button>
+              <Button type="primary" htmlType="submit">
+                Guardar cambios
               </Button>
-            </Form.Item>
-          )}
+            </Space>
+          </Form.Item>
         </Form>
-      </Card>
+      </Modal>
 
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button
+            type="primary"
+            onClick={() => setModalOperacionesAbierto(true)}
+          >
+            Gestionar stock
+          </Button>
         </Space>
 
         <Table

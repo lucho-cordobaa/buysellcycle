@@ -19,21 +19,19 @@ import {
   Switch,
   message,
   Popconfirm,
-  Grid,
+  Modal,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, UndoOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
 const { Title } = Typography;
 
-const { useBreakpoint } = Grid;
-
 function ProveedorPage() {
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
 
-  const screens = useBreakpoint();
 
   const fetchProveedores = async () => {
     try {
@@ -50,6 +48,18 @@ function ProveedorPage() {
 
   const [form] = Form.useForm();
 
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setEditandoId(null);
+    form.resetFields();
+  };
+
+  const handleNueva = () => {
+    setEditandoId(null);
+    form.resetFields();
+    setModalAbierto(true);
+  };
+
   const onFinish = async (values: { razonSocial: string; cuit: string }) => {
     try {
       if (editandoId !== null) {
@@ -59,8 +69,7 @@ function ProveedorPage() {
         await createProveedor(values);
         message.success('Proveedor creado correctamente');
       }
-      setEditandoId(null);
-      form.resetFields();
+      cerrarModal();
       fetchProveedores();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -109,16 +118,23 @@ function ProveedorPage() {
       razonSocial: proveedor.razonSocial,
       cuit: proveedor.cuit,
     });
+    setModalAbierto(true);
   };
 
   return (
     <div>
       <Title level={2}>Proveedores</Title>
-      <Card style={{ marginBottom: 24 }}>
+      <Modal
+        title={editandoId !== null ? 'Editar proveedor' : 'Nuevo proveedor'}
+        open={modalAbierto}
+        onCancel={cerrarModal}
+        footer={null}
+        forceRender
+      >
         <Form
           form={form}
           onFinish={onFinish}
-          layout={screens.xs ? 'vertical' : 'inline'}
+          layout="vertical"
         >
           <Form.Item
             name="razonSocial"
@@ -148,30 +164,34 @@ function ProveedorPage() {
           >
             <Input placeholder="Ej: 12-34567891-2" maxLength={13} />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={cerrarModal}>Cancelar</Button>
+              <Button type="primary" htmlType="submit">
+
               {editandoId !== null ? 'Guardar cambios' : 'Crear Proveedor'}
-            </Button>
-          </Form.Item>
-          {editandoId !== null && (
-            <Form.Item>
-              <Button
-                onClick={() => {
-                  setEditandoId(null);
-                  form.resetFields();
-                }}
-              >
-                Cancelar
               </Button>
-            </Form.Item>
-          )}
+            </Space>
+          </Form.Item>
         </Form>
-      </Card>
+      </Modal>
 
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleNueva}>
+            Nuevo proveedor
+          </Button>
         </Space>
 
         <Table

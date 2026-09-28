@@ -18,23 +18,21 @@ import {
   Switch,
   message,
   Popconfirm,
-  Grid,
+  Modal,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, UndoOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, UndoOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useProvinciaStore } from '../../store/provinciaStore';
 
 const { Title } = Typography;
 
-const { useBreakpoint } = Grid;
-
 function ProvinciasPage() {
   const provincias = useProvinciaStore((state) => state.provincias);
   const cargarProvincias = useProvinciaStore((state) => state.cargarProvincias);
   const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [modalAbierto, setModalAbierto] = useState(false);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
 
-  const screens = useBreakpoint();
 
   useEffect(() => {
     void cargarProvincias().catch((error: unknown) => {
@@ -43,6 +41,18 @@ function ProvinciasPage() {
   }, [cargarProvincias]);
 
   const [form] = Form.useForm();
+
+  const cerrarModal = () => {
+    setModalAbierto(false);
+    setEditandoId(null);
+    form.resetFields();
+  };
+
+  const handleNueva = () => {
+    setEditandoId(null);
+    form.resetFields();
+    setModalAbierto(true);
+  };
 
   const onFinish = async (values: { nombre: string }) => {
     try {
@@ -53,8 +63,7 @@ function ProvinciasPage() {
         await createProvincia(values);
         message.success('Provincia creada correctamente');
       }
-      setEditandoId(null);
-      form.resetFields();
+      cerrarModal();
       await cargarProvincias();
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -96,6 +105,7 @@ function ProvinciasPage() {
   const handleEdit = (provincia: Provincia) => {
     setEditandoId(provincia.id);
     form.setFieldsValue({ nombre: provincia.nombre });
+    setModalAbierto(true);
   };
 
   const provinciasFiltradas = provincias.filter(
@@ -105,11 +115,17 @@ function ProvinciasPage() {
   return (
     <div>
       <Title level={2}>Provincias</Title>
-      <Card style={{ marginBottom: 24 }}>
+      <Modal
+        title={editandoId !== null ? 'Editar provincia' : 'Nueva provincia'}
+        open={modalAbierto}
+        onCancel={cerrarModal}
+        footer={null}
+        forceRender
+      >
         <Form
           form={form}
           onFinish={onFinish}
-          layout={screens.xs ? 'vertical' : 'inline'}
+          layout="vertical"
         >
           <Form.Item
             name="nombre"
@@ -123,29 +139,33 @@ function ProvinciasPage() {
           >
             <Input placeholder="Ej: Santa Fe" />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
+          <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+            <Space>
+              <Button onClick={cerrarModal}>Cancelar</Button>
+              <Button type="primary" htmlType="submit">
+
               {editandoId !== null ? 'Guardar cambios' : 'Crear Provinica'}
-            </Button>
-          </Form.Item>
-          {editandoId !== null && (
-            <Form.Item>
-              <Button
-                onClick={() => {
-                  setEditandoId(null);
-                  form.resetFields();
-                }}
-              >
-                Cancelar
               </Button>
-            </Form.Item>
-          )}
+            </Space>
+          </Form.Item>
         </Form>
-      </Card>
+      </Modal>
       <Card>
-        <Space style={{ marginBottom: 16 }}>
-          <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
-          <span>Mostrar archivados</span>
+        <Space
+          style={{
+            marginBottom: 16,
+            width: '100%',
+            justifyContent: 'space-between',
+          }}
+          wrap
+        >
+          <Space>
+            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <span>Mostrar archivados</span>
+          </Space>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleNueva}>
+            Nueva provincia
+          </Button>
         </Space>
 
         <Table
