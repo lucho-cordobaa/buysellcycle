@@ -64,4 +64,9 @@ export class ProductoController {
     const productoReactivado = await this.productoService.reactivar(+id);
     return productoReactivado;
   }
+
+  @Post('recalcular-stock')
+  async recalcularStock() {
+    return this.productoService.recalcularStockTotal();
+  }
 }

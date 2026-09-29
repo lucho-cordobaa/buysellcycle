@@ -150,4 +150,26 @@ export class ProductoService {
       data: { archivado: false },
     });
   }
+
+  @Cron(CronExpression.EVERY_HOUR)
+  async recalcularStockTotal() {
+    const productos = await this.prisma.producto.findMany();
+
+    for (const producto of productos) {
+      const resultado = await this.prisma.stockProductoDeposito.aggregate({
+        where: { productoId: producto.id, archivado: false },
+        _sum: { stock: true },
+      });
+
+      const stockTotal = resultado._sum.stock || 0;
+
+      await this.prisma.producto.update({
+        where: { id: producto.id },
+        data: {
+          stockTotal,
+          ...(stockTotal > 0 ? { estado: 'DISPONIBLE' } : {}),
+        },
+      });
+    }
+  }
 }

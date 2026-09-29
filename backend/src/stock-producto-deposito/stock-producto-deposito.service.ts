@@ -19,27 +19,21 @@ export class StockProductoDepositoService {
   }
 
   async create(createStockProductoDepositoDto: CreateStockProductoDepositoDto) {
-    return this.prisma.$transaction(async (tx) => {
-      try {
-        const stockCreado = await tx.stockProductoDeposito.create({
-          data: createStockProductoDepositoDto,
-        });
-
-        await this.recalcularStockTotal(stockCreado.productoId, tx);
-
-        return stockCreado;
-      } catch (error) {
-        if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === 'P2002'
-        ) {
-          throw new BadRequestException(
-            'Ya existe un registro de stock para ese producto en ese depósito',
-          );
-        }
-        throw error;
+    try {
+      return await this.prisma.stockProductoDeposito.create({
+        data: createStockProductoDepositoDto,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new BadRequestException(
+          'Ya existe un registro de stock para ese producto en ese depósito',
+        );
       }
-    });
+      throw error;
+    }
   }
 
   findAll() {
@@ -54,45 +48,28 @@ export class StockProductoDepositoService {
     id: number,
     updateStockProductoDepositoDto: UpdateStockProductoDepositoDto,
   ) {
-    return this.prisma.$transaction(async (tx) => {
-      try {
-        const stockAnterior = await tx.stockProductoDeposito.findUniqueOrThrow({
-          where: { id },
-        });
-        const stockActualizado = await tx.stockProductoDeposito.update({
-          where: { id },
-          data: updateStockProductoDepositoDto,
-        });
-
-        if (stockAnterior.productoId !== stockActualizado.productoId) {
-          await this.recalcularStockTotal(stockAnterior.productoId, tx);
-        }
-        await this.recalcularStockTotal(stockActualizado.productoId, tx);
-
-        return stockActualizado;
-      } catch (error) {
-        if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === 'P2002'
-        ) {
-          throw new BadRequestException(
-            'Ya existe un registro de stock para ese producto en ese depósito',
-          );
-        }
-        throw error;
+    try {
+      return await this.prisma.stockProductoDeposito.update({
+        where: { id },
+        data: updateStockProductoDepositoDto,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new BadRequestException(
+          'Ya existe un registro de stock para ese producto en ese depósito',
+        );
       }
-    });
+      throw error;
+    }
   }
 
   async remove(id: number) {
-    return this.prisma.$transaction(async (tx) => {
-      const stockArchivado = await tx.stockProductoDeposito.update({
-        where: { id },
-        data: { archivado: true },
-      });
-
-      await this.recalcularStockTotal(stockArchivado.productoId, tx);
-      return stockArchivado;
+    return this.prisma.stockProductoDeposito.update({
+      where: { id },
+      data: { archivado: true },
     });
   }
 
@@ -117,7 +94,6 @@ export class StockProductoDepositoService {
         create: { depositoId, productoId, stock: cantidad },
       });
 
-      await this.recalcularStockTotal(productoId, tx);
       await this.actualizarFechaMovimiento(productoId, tx);
       return stockActualizado;
     });
@@ -146,7 +122,6 @@ export class StockProductoDepositoService {
         where: { depositoId_productoId: { depositoId, productoId } },
       });
 
-      await this.recalcularStockTotal(productoId, tx);
       await this.actualizarFechaMovimiento(productoId, tx);
 
       return stockActualizado;
@@ -189,7 +164,6 @@ export class StockProductoDepositoService {
       });
 
       await this.actualizarFechaMovimiento(productoId, tx);
-      await this.recalcularStockTotal(productoId, tx);
 
       const origenActualizado = await tx.stockProductoDeposito.findUnique({
         where: {
@@ -210,36 +184,10 @@ export class StockProductoDepositoService {
     });
   }
 
-  private async recalcularStockTotal(
-    productoId: number,
-    tx: Prisma.TransactionClient,
-  ) {
-    const resultado = await tx.stockProductoDeposito.aggregate({
-      where: { productoId, archivado: false },
-      _sum: { stock: true },
-    });
-
-    const stockTotal = resultado._sum.stock || 0;
-
-    await tx.producto.update({
-      where: { id: productoId },
-      data: {
-        stockTotal,
-        ...(stockTotal > 0 ? { estado: 'DISPONIBLE' } : {}),
-      },
-    });
-  }
-
   async reactivar(id: number) {
-    return this.prisma.$transaction(async (tx) => {
-      const stockReactivado = await tx.stockProductoDeposito.update({
-        where: { id },
-        data: { archivado: false },
-      });
-
-      await this.recalcularStockTotal(stockReactivado.productoId, tx);
-
-      return stockReactivado;
+    return this.prisma.stockProductoDeposito.update({
+      where: { id },
+      data: { archivado: false },
     });
   }
 }

@@ -44,6 +44,10 @@ export async function actualizarEstadosProducto(): Promise<void> {
   await api.post('/producto/actualizar-estados');
 }
 
+export async function recalcularStockProductos(): Promise<void> {
+  await api.post('/producto/recalcular-stock');
+}
+
 export async function reactivarProducto(id: number): Promise<Producto> {
   const response = await api.patch(`/producto/${id}/reactivar`);
   return response.data;

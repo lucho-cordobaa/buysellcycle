@@ -10,7 +10,10 @@ import {
   reactivarStockProductoDeposito,
 } from './services/stock-producto-deposito';
 import { getDepositos } from '../deposito/services/deposito';
-import { getProductos } from '../producto/services/producto';
+import {
+  getProductos,
+  recalcularStockProductos,
+} from '../producto/services/producto';
 import type { StockProductoDeposito } from './types/stock-producto-deposito';
 import type { Deposito } from '../deposito/types/deposito';
 import type { Producto } from '../producto/types/producto';
@@ -43,6 +46,7 @@ function StockProductoDepositoPage() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modalOperacionesAbierto, setModalOperacionesAbierto] = useState(false);
   const [mostrarArchivados, setMostrarArchivados] = useState(false);
+  const [recalculandoStock, setRecalculandoStock] = useState(false);
 
   const fetchStocks = async () => {
     try {
@@ -263,6 +267,23 @@ function StockProductoDepositoPage() {
     }
   };
 
+  const handleRecalcularStock = async () => {
+    setRecalculandoStock(true);
+    try {
+      await recalcularStockProductos();
+      await fetchProductos();
+      message.success('Stock total recalculado correctamente');
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        message.error(error.response.data.message);
+      } else {
+        message.error('Ocurrió un error al recalcular el stock');
+      }
+    } finally {
+      setRecalculandoStock(false);
+    }
+  };
+
   const stocksFiltrados = stocks.filter(
     (stock) => mostrarArchivados || !stock.archivado,
   );
@@ -296,7 +317,10 @@ function StockProductoDepositoPage() {
                       { required: true, message: 'Seleccione un depósito' },
                     ]}
                   >
-                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
+                    <Select
+                      filterOption={filterSelectOption}
+                      showSearch
+                      optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesDepositos}
                     />
@@ -308,7 +332,10 @@ function StockProductoDepositoPage() {
                       { required: true, message: 'Seleccione un producto' },
                     ]}
                   >
-                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
+                    <Select
+                      filterOption={filterSelectOption}
+                      showSearch
+                      optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesProductos}
                     />
@@ -351,7 +378,10 @@ function StockProductoDepositoPage() {
                       { required: true, message: 'Seleccione un depósito' },
                     ]}
                   >
-                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
+                    <Select
+                      filterOption={filterSelectOption}
+                      showSearch
+                      optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesDepositos}
                       onChange={() =>
@@ -366,7 +396,10 @@ function StockProductoDepositoPage() {
                       { required: true, message: 'Seleccione un producto' },
                     ]}
                   >
-                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
+                    <Select
+                      filterOption={filterSelectOption}
+                      showSearch
+                      optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesProductosEgreso}
                     />
@@ -412,7 +445,10 @@ function StockProductoDepositoPage() {
                       },
                     ]}
                   >
-                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
+                    <Select
+                      filterOption={filterSelectOption}
+                      showSearch
+                      optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesDepositos}
                       onChange={() =>
@@ -430,7 +466,10 @@ function StockProductoDepositoPage() {
                       },
                     ]}
                   >
-                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
+                    <Select
+                      filterOption={filterSelectOption}
+                      showSearch
+                      optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesDepositos}
                     />
@@ -442,7 +481,10 @@ function StockProductoDepositoPage() {
                       { required: true, message: 'Seleccione un producto' },
                     ]}
                   >
-                    <Select filterOption={filterSelectOption} showSearch optionFilterProp="label"
+                    <Select
+                      filterOption={filterSelectOption}
+                      showSearch
+                      optionFilterProp="label"
                       style={{ width: 180 }}
                       options={opcionesProductosTransferencia}
                     />
@@ -473,21 +515,39 @@ function StockProductoDepositoPage() {
         />
       </Modal>
 
-      <Modal title="Editar registro" open={modalAbierto} onCancel={cerrarModal} footer={null} forceRender>
+      <Modal
+        title="Editar registro"
+        open={modalAbierto}
+        onCancel={cerrarModal}
+        footer={null}
+        forceRender
+      >
         <Form form={form} onFinish={onFinishEdit} layout="vertical">
           <Form.Item
             name="depositoId"
             label="Depósito"
             rules={[{ required: true }]}
           >
-            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 180 }} options={opcionesDepositos} />
+            <Select
+              filterOption={filterSelectOption}
+              showSearch
+              optionFilterProp="label"
+              style={{ width: 180 }}
+              options={opcionesDepositos}
+            />
           </Form.Item>
           <Form.Item
             name="productoId"
             label="Producto"
             rules={[{ required: true }]}
           >
-            <Select filterOption={filterSelectOption} showSearch optionFilterProp="label" style={{ width: 180 }} options={opcionesProductos} />
+            <Select
+              filterOption={filterSelectOption}
+              showSearch
+              optionFilterProp="label"
+              style={{ width: 180 }}
+              options={opcionesProductos}
+            />
           </Form.Item>
           <Form.Item
             name="stock"
@@ -524,15 +584,26 @@ function StockProductoDepositoPage() {
           wrap
         >
           <Space>
-            <Switch checked={mostrarArchivados} onChange={setMostrarArchivados} />
+            <Switch
+              checked={mostrarArchivados}
+              onChange={setMostrarArchivados}
+            />
             <span>Mostrar archivados</span>
           </Space>
-          <Button
-            type="primary"
-            onClick={() => setModalOperacionesAbierto(true)}
-          >
-            Gestionar stock
-          </Button>
+          <Space wrap>
+            <Button
+              loading={recalculandoStock}
+              onClick={handleRecalcularStock}
+            >
+              Recalcular stock total
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => setModalOperacionesAbierto(true)}
+            >
+              Gestionar stock
+            </Button>
+          </Space>
         </Space>
 
         <Table
